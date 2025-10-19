@@ -42,7 +42,6 @@ const Dashboard = () => {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const rewardSystem = useRewardSystem();
   const [partnerName, setPartnerName] = useState(() => 
@@ -217,7 +216,6 @@ const Dashboard = () => {
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
     setIsNotesOpen(true);
-    setIsMobileMenuOpen(false); // Close mobile menu
   };
   
   const handleTimeSlotClick = (date: Date, time: string) => {
@@ -243,226 +241,13 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col w-full bg-forest">
-      {/* Mobile Header with Hamburger */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/75 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-2">
-            <Heart className="w-6 h-6 text-primary" />
-            <span className="font-bold text-xl text-foreground">VibeCare</span>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </Button>
-        </div>
-
-        {/* Mobile Menu Dropdown */}
-        {isMobileMenuOpen && (
-          <div className="border-t border-border bg-card p-4 space-y-4">
-            <div>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Categories</h3>
-              <div className="space-y-1">
-                {categories.map((cat) => (
-                  <Button
-                    key={cat.id}
-                    variant={selectedCategory === cat.id ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => {
-                      setSelectedCategory(cat.id);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full justify-start gap-2"
-                  >
-                    <cat.icon className="w-4 h-4" />
-                    {cat.name}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  navigate('/vibe-partner');
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full justify-start gap-2"
-              >
-                <Heart className="w-4 h-4" />
-                Vibe Buddy
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  navigate('/cbt-therapist');
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full justify-start gap-2"
-              >
-                <Brain className="w-4 h-4" />
-                CBT Therapist
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  navigate('/common-room');
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full justify-start gap-2"
-              >
-                <Users className="w-4 h-4" />
-                Community Room
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  navigate('/shop');
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full justify-start gap-2"
-              >
-                <Tag className="w-4 h-4" />
-                Avatar Shop
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  navigate('/mood-dashboard');
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full justify-start gap-2"
-              >
-                <LayoutGrid className="w-4 h-4" />
-                Mood Analytics
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="w-full justify-start gap-2"
-              >
-                <LogOut className="w-4 h-4" />
-                Sign Out
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-
       {/* Main Content Area with Resizable Panels */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden pt-16 lg:pt-0">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Desktop: Resizable Layout */}
         <div className="hidden lg:flex flex-1">
           <ResizablePanelGroup direction="horizontal">
-            {/* Left Sidebar Panel */}
-            <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-              <aside className="h-full flex flex-col border-r border-border bg-card/75 backdrop-blur-sm overflow-hidden">
-                <div className="flex-1 overflow-y-auto">
-                  <div className="p-6 space-y-6">
-                    {/* Header */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-4">
-                        <Heart className="w-6 h-6 text-primary" />
-                        <span className="font-bold text-xl text-foreground">VibeCare</span>
-                      </div>
-                      <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground">
-                        <LogOut className="w-4 h-4" />
-                        Sign Out
-                      </Button>
-                    </div>
-
-                    {/* Categories */}
-                    <div>
-                      <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3 px-2">Categories</h3>
-                      <div className="space-y-1">
-                        {categories.map((cat) => (
-                          <Button
-                            key={cat.id}
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSelectedCategory(cat.id)}
-                            className={`w-full justify-start gap-3 ${
-                              selectedCategory === cat.id 
-                                ? 'bg-primary/10 text-primary font-medium' 
-                                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                            }`}
-                          >
-                            <cat.icon className="w-4 h-4" />
-                            <span>{cat.name}</span>
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Quick Actions */}
-                    <div>
-                      <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3 px-2">Quick Access</h3>
-                      <div className="space-y-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate('/vibe-partner')}
-                          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-                        >
-                          <Heart className="w-4 h-4" />
-                          Vibe Buddy
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate('/cbt-therapist')}
-                          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-                        >
-                          <Brain className="w-4 h-4" />
-                          CBT Therapist
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate('/common-room')}
-                          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-                        >
-                          <Users className="w-4 h-4" />
-                          Community Room
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate('/shop')}
-                          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-                        >
-                          <Tag className="w-4 h-4" />
-                          Avatar Shop
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate('/mood-dashboard')}
-                          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-                        >
-                          <LayoutGrid className="w-4 h-4" />
-                          Mood Analytics
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </aside>
-            </ResizablePanel>
-
-            <ResizableHandle withHandle />
-
             {/* Central Calendar Panel */}
-            <ResizablePanel defaultSize={50} minSize={40}>
+            <ResizablePanel defaultSize={65} minSize={50}>
               <div className="h-full overflow-y-auto">
                 <div className="p-6 space-y-6">
                   {/* Vibe Partner */}
