@@ -294,7 +294,7 @@ const Dashboard = () => {
                 className="w-full justify-start gap-2"
               >
                 <Heart className="w-4 h-4" />
-                Vibe Partner
+                Vibe Buddy
               </Button>
               <Button
                 variant="ghost"
@@ -390,7 +390,7 @@ const Dashboard = () => {
                           className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
                         >
                           <Heart className="w-4 h-4" />
-                          Vibe Partner
+                          Vibe Buddy
                         </Button>
                         <Button
                           variant="ghost"
