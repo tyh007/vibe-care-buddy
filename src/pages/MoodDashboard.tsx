@@ -140,13 +140,13 @@ const MoodDashboard = () => {
             <div className="h-1 w-12 bg-gradient-primary rounded-full" />
             <h2 className="text-2xl font-display font-bold text-foreground">Your Overview</h2>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-4">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-2">
               <Card className="glass border-2 border-primary/20 p-6 hover-lift shadow-medium h-full flex items-center justify-center">
                 <PixelAvatar size="medium" />
               </Card>
             </div>
-            <div className="lg:col-span-8">
+            <div className="lg:col-span-3">
               <StatsCards />
             </div>
           </div>
