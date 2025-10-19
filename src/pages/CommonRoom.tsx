@@ -113,23 +113,20 @@ const CommonRoom = () => {
       return;
     }
 
-    // Fetch profiles separately
-    const userIds = [...new Set(data?.map(m => m.user_id) || [])];
-    const { data: profilesData } = await supabase
-      .from('profiles')
-      .select('user_id, display_name')
-      .in('user_id', userIds);
-
-    const profilesMap = new Map(
-      profilesData?.map(p => [p.user_id, p.display_name]) || []
+    // Fetch display names using the security definer function
+    const messagesWithProfiles = await Promise.all(
+      (data || []).map(async (msg) => {
+        const { data: profileData } = await supabase.rpc('get_public_profile', {
+          profile_user_id: msg.user_id
+        });
+        return {
+          ...msg,
+          profiles: {
+            display_name: profileData?.[0]?.display_name || 'Anonymous'
+          }
+        };
+      })
     );
-
-    const messagesWithProfiles = data?.map(msg => ({
-      ...msg,
-      profiles: {
-        display_name: profilesMap.get(msg.user_id) || 'Anonymous'
-      }
-    })) || [];
 
     setMessages(messagesWithProfiles as Message[]);
   };

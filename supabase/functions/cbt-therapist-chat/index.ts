@@ -12,6 +12,15 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { message, conversationHistory } = await req.json();
     
     console.log('Received CBT therapist request:', { messageLength: message?.length, historyLength: conversationHistory?.length });
