@@ -244,7 +244,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex flex-col w-full bg-forest">
       {/* Mobile Header with Hamburger */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/75 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
             <Heart className="w-6 h-6 text-primary" />
@@ -329,7 +329,7 @@ const Dashboard = () => {
           <ResizablePanelGroup direction="horizontal">
             {/* Left Sidebar Panel */}
             <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-              <aside className="h-full flex flex-col border-r border-border bg-card/80 backdrop-blur-sm overflow-hidden">
+              <aside className="h-full flex flex-col border-r border-border bg-card/75 backdrop-blur-sm overflow-hidden">
                 <div className="flex-1 overflow-y-auto">
                   <div className="p-6 space-y-6">
                     {/* Header */}
@@ -420,8 +420,7 @@ const Dashboard = () => {
                     />
                   </button>
 
-                  {/* Mood Check */}
-                  <Card className="p-4 bg-card/80 backdrop-blur-sm">
+                  <Card className="p-4 bg-card/75 backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-semibold text-foreground">Quick Mood Check</h3>
                       <Heart className="w-5 h-5 text-secondary" />
@@ -506,7 +505,7 @@ const Dashboard = () => {
 
             {/* Right Context Panel */}
             <ResizablePanel defaultSize={30} minSize={25} maxSize={40}>
-              <aside className="h-full border-l border-border bg-card/80 backdrop-blur-sm overflow-y-auto">
+              <aside className="h-full border-l border-border bg-card/75 backdrop-blur-sm overflow-y-auto">
                 <NotesEditorSidebar
                   event={selectedEvent}
                   isOpen={isNotesOpen || !!selectedEvent}
@@ -548,8 +547,7 @@ const Dashboard = () => {
               />
             </button>
 
-            {/* Mood Check */}
-            <Card className="p-4 bg-card/80 backdrop-blur-sm">
+            <Card className="p-4 bg-card/75 backdrop-blur-sm">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-foreground">Quick Mood Check</h3>
                 <Heart className="w-5 h-5 text-secondary" />
@@ -621,7 +619,7 @@ const Dashboard = () => {
 
           {/* Mobile Notes Overlay */}
           {(selectedEvent || isNotesOpen) && (
-            <div className="fixed inset-0 z-40 bg-card/95 backdrop-blur-sm">
+            <div className="fixed inset-0 z-40 bg-card/75 backdrop-blur-sm">
               <NotesEditorSidebar
                 event={selectedEvent}
                 isOpen={true}
