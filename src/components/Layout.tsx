@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 import { useLocation } from "react-router-dom";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 
 interface LayoutProps {
   children: ReactNode;
@@ -17,10 +19,18 @@ export const Layout = ({ children }: LayoutProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      <div className="page-transition">
-        {children}
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-gradient-hero">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col">
+          <header className="h-12 flex items-center border-b border-border/50 bg-card/30 backdrop-blur-sm px-4">
+            <SidebarTrigger />
+          </header>
+          <main className="flex-1 overflow-auto page-transition">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
