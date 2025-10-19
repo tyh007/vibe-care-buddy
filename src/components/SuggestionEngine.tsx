@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Brain, Check, Clock, Heart, Sparkles, Wind } from "lucide-react";
+import { Brain, Check, Clock, Heart, Sparkles, Wind, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
+import { SuggestionGuideDialog } from "./SuggestionGuideDialog";
 
 interface CalendarEvent {
   id: string;
@@ -20,6 +21,8 @@ interface Suggestion {
   category: string;
   icon: typeof Wind;
   reason: string;
+  guide?: string[];
+  videoUrl?: string;
 }
 
 interface SuggestionEngineProps {
@@ -56,7 +59,15 @@ const generateSuggestions = (events: CalendarEvent[]): Suggestion[] => {
       duration: 15,
       category: 'wellness',
       icon: Wind,
-      reason: 'You have 3+ hours of study time scheduled. Taking breaks improves focus and retention.'
+      reason: 'You have 3+ hours of study time scheduled. Taking breaks improves focus and retention.',
+      guide: [
+        'Step away from your desk',
+        'Walk outside for 5-10 minutes',
+        'Do 5 minutes of gentle stretching',
+        'Focus on neck, shoulders, and back',
+        'Take deep breaths while moving'
+      ],
+      videoUrl: 'https://www.youtube.com/watch?v=g_tea8ZNk5A' // 10-min desk stretches
     });
   }
   
@@ -74,7 +85,16 @@ const generateSuggestions = (events: CalendarEvent[]): Suggestion[] => {
       duration: 5,
       category: 'wellness',
       icon: Wind,
-      reason: 'Starting your day with mindfulness can reduce anxiety and improve focus.'
+      reason: 'Starting your day with mindfulness can reduce anxiety and improve focus.',
+      guide: [
+        'Find a comfortable seated position',
+        'Close your eyes or soften your gaze',
+        'Breathe in slowly through your nose for 4 counts',
+        'Hold your breath for 4 counts',
+        'Exhale slowly through your mouth for 6 counts',
+        'Repeat for 5 minutes'
+      ],
+      videoUrl: 'https://www.youtube.com/watch?v=tybOi4hjZFQ' // 5-min breathing exercise
     });
   }
   
@@ -89,7 +109,16 @@ const generateSuggestions = (events: CalendarEvent[]): Suggestion[] => {
       duration: 10,
       category: 'wellness',
       icon: Heart,
-      reason: 'Gratitude practice is proven to reduce symptoms of depression and improve well-being.'
+      reason: 'Gratitude practice is proven to reduce symptoms of depression and improve well-being.',
+      guide: [
+        'Get a notebook or open your notes app',
+        'Find a quiet, comfortable spot',
+        'Write down 3 things you\'re grateful for today',
+        'Be specific - instead of "family," try "my sister\'s encouraging text"',
+        'Reflect on why each thing matters to you',
+        'Notice how you feel after writing'
+      ],
+      videoUrl: 'https://www.youtube.com/watch?v=WPPPFqsECz0' // Gratitude journaling guide
     });
   }
   
@@ -102,7 +131,17 @@ const generateSuggestions = (events: CalendarEvent[]): Suggestion[] => {
       duration: 5,
       category: 'wellness',
       icon: Sparkles,
-      reason: 'Regular body awareness reduces stress and improves emotional regulation.'
+      reason: 'Regular body awareness reduces stress and improves emotional regulation.',
+      guide: [
+        'Lie down or sit comfortably',
+        'Close your eyes and take 3 deep breaths',
+        'Starting at your toes, notice any tension',
+        'Slowly move attention up: feet → legs → stomach → chest',
+        'Continue to shoulders → arms → neck → face',
+        'Breathe into any areas of tension',
+        'End by wiggling fingers and toes'
+      ],
+      videoUrl: 'https://www.youtube.com/watch?v=QS2yDmWk0vs' // 5-min body scan meditation
     });
   }
   
@@ -113,6 +152,8 @@ export const SuggestionEngine = ({ events, onAcceptSuggestion }: SuggestionEngin
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [acceptedIds, setAcceptedIds] = useState<Set<string>>(new Set());
   const [draggedSuggestion, setDraggedSuggestion] = useState<Suggestion | null>(null);
+  const [guideDialogOpen, setGuideDialogOpen] = useState(false);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   
   useEffect(() => {
     const newSuggestions = generateSuggestions(events);
@@ -138,6 +179,17 @@ export const SuggestionEngine = ({ events, onAcceptSuggestion }: SuggestionEngin
   
   const handleDragEnd = () => {
     setDraggedSuggestion(null);
+  };
+  
+  const handleViewGuide = (suggestion: Suggestion) => {
+    setSelectedSuggestion(suggestion);
+    setGuideDialogOpen(true);
+  };
+  
+  const handleCompleteFromGuide = () => {
+    if (selectedSuggestion) {
+      handleAccept(selectedSuggestion);
+    }
   };
   
   if (suggestions.length === 0) {
@@ -207,6 +259,15 @@ export const SuggestionEngine = ({ events, onAcceptSuggestion }: SuggestionEngin
                   <div className="pt-2 flex items-center gap-2">
                     <Button
                       size="sm"
+                      variant="outline"
+                      onClick={() => handleViewGuide(suggestion)}
+                      className="h-8"
+                    >
+                      <BookOpen className="w-3 h-3 mr-1" />
+                      How To
+                    </Button>
+                    <Button
+                      size="sm"
                       variant={isAccepted ? "outline" : "default"}
                       onClick={() => handleAccept(suggestion)}
                       disabled={isAccepted}
@@ -221,9 +282,6 @@ export const SuggestionEngine = ({ events, onAcceptSuggestion }: SuggestionEngin
                         'Quick Add'
                       )}
                     </Button>
-                    <span className="text-xs text-muted-foreground">
-                      or drag to calendar →
-                    </span>
                   </div>
                 </div>
               </div>
@@ -235,6 +293,18 @@ export const SuggestionEngine = ({ events, onAcceptSuggestion }: SuggestionEngin
       <p className="text-xs text-center text-muted-foreground pt-2">
         Suggestions update based on your schedule
       </p>
+      
+      {selectedSuggestion && (
+        <SuggestionGuideDialog
+          open={guideDialogOpen}
+          onOpenChange={setGuideDialogOpen}
+          title={selectedSuggestion.title}
+          description={selectedSuggestion.description}
+          guide={selectedSuggestion.guide}
+          videoUrl={selectedSuggestion.videoUrl}
+          onComplete={handleCompleteFromGuide}
+        />
+      )}
     </Card>
   );
 };
