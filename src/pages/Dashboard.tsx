@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Calendar, Heart, Plus, Settings, LogOut, Sparkles } from "lucide-react";
+import { Calendar, Heart, Settings, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { MoodTimeline } from "@/components/MoodTimeline";
 import { AddEventDialog } from "@/components/AddEventDialog";
+import { SuggestionEngine } from "@/components/SuggestionEngine";
+import { CalendarDropZone } from "@/components/CalendarDropZone";
 import { format, subDays } from "date-fns";
 
 interface MoodEntry {
@@ -115,11 +117,64 @@ const Dashboard = () => {
       id: Date.now().toString(),
     };
     
-    setEvents([...events, event]);
+    setEvents([...events, event].sort((a, b) => a.start.localeCompare(b.start)));
     
     toast({
       title: "Event Added! 🎉",
       description: `${event.title} has been added to your schedule.`,
+    });
+  };
+
+  const handleAcceptSuggestion = (suggestion: any) => {
+    // Find the next available free slot
+    const sortedEvents = [...events].sort((a, b) => a.start.localeCompare(b.start));
+    let suggestedStart = "14:00"; // Default afternoon slot
+    
+    // Try to find a gap after study sessions
+    for (let i = 0; i < sortedEvents.length - 1; i++) {
+      const current = sortedEvents[i];
+      const next = sortedEvents[i + 1];
+      
+      if (current.category === 'study' || current.category === 'class') {
+        const [endHour, endMin] = current.end.split(':').map(Number);
+        const [nextHour, nextMin] = next.start.split(':').map(Number);
+        const gapMinutes = (nextHour * 60 + nextMin) - (endHour * 60 + endMin);
+        
+        if (gapMinutes >= suggestion.duration) {
+          suggestedStart = current.end;
+          break;
+        }
+      }
+    }
+    
+    const [startHour, startMin] = suggestedStart.split(':').map(Number);
+    const endMinutes = startHour * 60 + startMin + suggestion.duration;
+    const endHour = Math.floor(endMinutes / 60);
+    const endMin = endMinutes % 60;
+    const suggestedEnd = `${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
+    
+    const newEvent: CalendarEvent = {
+      id: Date.now().toString(),
+      title: suggestion.title,
+      start: suggestedStart,
+      end: suggestedEnd,
+      category: 'wellness',
+      notes: suggestion.description,
+    };
+    
+    setEvents([...events, newEvent].sort((a, b) => a.start.localeCompare(b.start)));
+    
+    toast({
+      title: "Wellness Activity Scheduled! 🌟",
+      description: `${suggestion.title} added at ${suggestedStart}`,
+    });
+  };
+
+  const handleDropSuggestion = (suggestionData: any, slotStart: string) => {
+    // This would be called when dragging a suggestion to a specific time slot
+    toast({
+      title: "Drop to Schedule",
+      description: "Drag and drop feature - click 'Quick Add' to schedule instantly!",
     });
   };
 
@@ -154,7 +209,7 @@ const Dashboard = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left Column: Quick Stats & Mood */}
+          {/* Left Column: Mood Check & Suggestions */}
           <div className="lg:col-span-1 space-y-6">
             {/* Quick Mood Check-In */}
             <Card className="p-6 space-y-4 bg-card shadow-soft">
@@ -182,99 +237,36 @@ const Dashboard = () => {
               <p className="text-sm text-muted-foreground text-center">How are you feeling right now?</p>
             </Card>
 
-            {/* Today's Suggestions */}
-            <Card className="p-6 space-y-4 bg-card shadow-soft">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-lg text-card-foreground">Suggested for You</h3>
-                <Sparkles className="w-5 h-5 text-primary" />
-              </div>
-              
-              <div className="space-y-3">
-                <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
-                  <p className="text-sm font-medium text-foreground">5-min breathing exercise</p>
-                  <p className="text-xs text-muted-foreground mt-1">Free at 2:30 PM</p>
-                </div>
-                
-                <div className="p-3 rounded-lg bg-secondary/5 border border-secondary/10">
-                  <p className="text-sm font-medium text-foreground">Take a short walk</p>
-                  <p className="text-xs text-muted-foreground mt-1">Free at 4:00 PM</p>
-                </div>
-                
-                <div className="p-3 rounded-lg bg-success/5 border border-success/10">
-                  <p className="text-sm font-medium text-foreground">Review class notes</p>
-                  <p className="text-xs text-muted-foreground mt-1">Free at 6:00 PM</p>
-                </div>
-              </div>
-            </Card>
+            {/* Smart Suggestion Engine */}
+            <SuggestionEngine 
+              events={events}
+              onAcceptSuggestion={handleAcceptSuggestion}
+            />
 
             {/* Interactive Mood Timeline */}
             <MoodTimeline data={moodHistory} />
           </div>
 
-          {/* Right Column: Calendar View */}
+          {/* Right Column: Calendar with Drop Zones */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="p-6 bg-card shadow-soft">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-6 h-6 text-primary" />
-                  <h2 className="text-2xl font-bold text-card-foreground">Today's Schedule</h2>
-                </div>
-                <Button variant="hero" size="sm" onClick={handleAddEvent}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Event
-                </Button>
-              </div>
+            <div className="flex justify-end mb-4">
+              <Button variant="hero" size="sm" onClick={handleAddEvent}>
+                <Calendar className="w-4 h-4 mr-2" />
+                Add Event
+              </Button>
+            </div>
+            
+            <CalendarDropZone 
+              events={events}
+              onDropSuggestion={handleDropSuggestion}
+            />
 
-              {/* Calendar Events */}
-              <div className="space-y-4">
-                {events.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>No events scheduled yet.</p>
-                    <p className="text-sm">Click "Add Event" to get started!</p>
-                  </div>
-                ) : (
-                  events.map((event) => {
-                    const categoryColors: Record<string, string> = {
-                      class: 'bg-primary',
-                      study: 'bg-secondary',
-                      wellness: 'bg-success',
-                      social: 'bg-accent',
-                      other: 'bg-muted-foreground',
-                    };
-
-                    return (
-                      <div
-                        key={event.id}
-                        className="flex gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
-                      >
-                        <div className="text-center min-w-[60px]">
-                          <p className="text-sm font-semibold text-foreground">{event.start}</p>
-                          <p className="text-xs text-muted-foreground">to</p>
-                          <p className="text-sm font-semibold text-foreground">{event.end}</p>
-                        </div>
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-3 h-3 rounded-full ${categoryColors[event.category]}`} />
-                            <p className="font-medium text-foreground">{event.title}</p>
-                          </div>
-                          {event.notes && (
-                            <p className="text-sm text-muted-foreground italic">Notes: {event.notes}</p>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-
-              {/* View Controls */}
-              <div className="mt-6 flex gap-2 justify-center">
-                <Button variant="outline" size="sm">Day</Button>
-                <Button variant="outline" size="sm">Week</Button>
-                <Button variant="outline" size="sm">Month</Button>
-              </div>
-            </Card>
+            {/* View Controls */}
+            <div className="flex gap-2 justify-center">
+              <Button variant="outline" size="sm">Day</Button>
+              <Button variant="outline" size="sm">Week</Button>
+              <Button variant="outline" size="sm">Month</Button>
+            </div>
           </div>
         </div>
       </div>
