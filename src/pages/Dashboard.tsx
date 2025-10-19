@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Calendar, Heart, Settings, LogOut, CalendarDays, LayoutGrid } from "lucide-react";
@@ -49,60 +49,82 @@ const Dashboard = () => {
   const [partnerType, setPartnerType] = useState<'cat' | 'panda'>(() => 
     (localStorage.getItem('vibePartnerType') as 'cat' | 'panda') || 'cat'
   );
+  const [addEventInitialDate, setAddEventInitialDate] = useState<Date | undefined>(calendarDate);
   
   // Sample mood data with dates and events (last 7 days)
-  const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([
-    { date: format(subDays(new Date(), 6), 'yyyy-MM-dd'), mood: 3, events: ['CS101 Lecture', 'Study Group'] },
-    { date: format(subDays(new Date(), 5), 'yyyy-MM-dd'), mood: 4, events: ['Gym', 'Coffee with friends'] },
-    { date: format(subDays(new Date(), 4), 'yyyy-MM-dd'), mood: 3, events: ['Statistics Exam', 'Library Session'] },
-    { date: format(subDays(new Date(), 3), 'yyyy-MM-dd'), mood: 4, events: ['CS Lab', 'Meditation'] },
-    { date: format(subDays(new Date(), 2), 'yyyy-MM-dd'), mood: 4, events: ['Group Project', 'Yoga Class'] },
-    { date: format(subDays(new Date(), 1), 'yyyy-MM-dd'), mood: 5, events: ['Volunteer Work', 'Movie Night'] },
-    { date: format(new Date(), 'yyyy-MM-dd'), mood: 5, events: ['Morning Walk', 'Productive Study Session'] },
-  ]);
+  const [moodHistory, setMoodHistory] = useState<MoodEntry[]>(() => {
+    const saved = localStorage.getItem('vc_moods');
+    if (saved) {
+      try { return JSON.parse(saved) as MoodEntry[]; } catch {}
+    }
+    return [
+      { date: format(subDays(new Date(), 6), 'yyyy-MM-dd'), mood: 3, events: ['CS101 Lecture', 'Study Group'] },
+      { date: format(subDays(new Date(), 5), 'yyyy-MM-dd'), mood: 4, events: ['Gym', 'Coffee with friends'] },
+      { date: format(subDays(new Date(), 4), 'yyyy-MM-dd'), mood: 3, events: ['Statistics Exam', 'Library Session'] },
+      { date: format(subDays(new Date(), 3), 'yyyy-MM-dd'), mood: 4, events: ['CS Lab', 'Meditation'] },
+      { date: format(subDays(new Date(), 2), 'yyyy-MM-dd'), mood: 4, events: ['Group Project', 'Yoga Class'] },
+      { date: format(subDays(new Date(), 1), 'yyyy-MM-dd'), mood: 5, events: ['Volunteer Work', 'Movie Night'] },
+      { date: format(new Date(), 'yyyy-MM-dd'), mood: 5, events: ['Morning Walk', 'Productive Study Session'] },
+    ];
+  });
 
   // Calendar events with ISO timestamps for week view
-  const [events, setEvents] = useState<CalendarEvent[]>([
-    {
-      id: '1',
-      title: 'Introduction to Psychology',
-      start: '09:00',
-      end: '10:00',
-      date: format(new Date(), 'yyyy-MM-dd'),
-      category: 'class',
-      notes: 'Review chapters 3-4',
-      color: '#8b5cf6'
-    },
-    {
-      id: '2',
-      title: 'Study Group - Statistics',
-      start: '11:00',
-      end: '13:00',
-      date: format(new Date(), 'yyyy-MM-dd'),
-      category: 'study',
-      notes: 'Bring practice problems',
-      color: '#ec4899'
-    },
-    {
-      id: '3',
-      title: 'Computer Science Lab',
-      start: '15:30',
-      end: '17:00',
-      date: format(new Date(), 'yyyy-MM-dd'),
-      category: 'class',
-      color: '#8b5cf6'
-    },
-    {
-      id: '4',
-      title: 'Yoga Class',
-      start: '18:00',
-      end: '19:00',
-      date: format(new Date(), 'yyyy-MM-dd'),
-      category: 'wellness',
-      notes: 'Bring yoga mat',
-      color: '#10b981'
+  const [events, setEvents] = useState<CalendarEvent[]>(() => {
+    const saved = localStorage.getItem('vc_events');
+    if (saved) {
+      try { return JSON.parse(saved) as CalendarEvent[]; } catch {}
     }
-  ]);
+    return [
+      {
+        id: '1',
+        title: 'Introduction to Psychology',
+        start: '09:00',
+        end: '10:00',
+        date: format(new Date(), 'yyyy-MM-dd'),
+        category: 'class',
+        notes: 'Review chapters 3-4',
+        color: '#8b5cf6'
+      },
+      {
+        id: '2',
+        title: 'Study Group - Statistics',
+        start: '11:00',
+        end: '13:00',
+        date: format(new Date(), 'yyyy-MM-dd'),
+        category: 'study',
+        notes: 'Bring practice problems',
+        color: '#ec4899'
+      },
+      {
+        id: '3',
+        title: 'Computer Science Lab',
+        start: '15:30',
+        end: '17:00',
+        date: format(new Date(), 'yyyy-MM-dd'),
+        category: 'class',
+        color: '#8b5cf6'
+      },
+      {
+        id: '4',
+        title: 'Yoga Class',
+        start: '18:00',
+        end: '19:00',
+        date: format(new Date(), 'yyyy-MM-dd'),
+        category: 'wellness',
+        notes: 'Bring yoga mat',
+        color: '#10b981'
+      }
+    ];
+  });
+
+  // Persist events and moods to localStorage
+  useEffect(() => {
+    localStorage.setItem('vc_events', JSON.stringify(events));
+  }, [events]);
+
+  useEffect(() => {
+    localStorage.setItem('vc_moods', JSON.stringify(moodHistory));
+  }, [moodHistory]);
 
   const handleLogout = () => {
     // TODO: Implement actual logout
@@ -135,6 +157,7 @@ const Dashboard = () => {
   };
 
   const handleAddEvent = () => {
+    setAddEventInitialDate(calendarDate);
     setIsAddEventOpen(true);
   };
 
@@ -250,7 +273,8 @@ const Dashboard = () => {
   };
   
   const handleTimeSlotClick = (date: Date, time: string) => {
-    // Open add event dialog with pre-filled time
+    // Open add event dialog with pre-filled date
+    setAddEventInitialDate(date);
     setIsAddEventOpen(true);
   };
   
@@ -439,6 +463,7 @@ const Dashboard = () => {
         open={isAddEventOpen}
         onOpenChange={setIsAddEventOpen}
         onAddEvent={handleEventCreate}
+        initialDate={addEventInitialDate}
       />
     </div>
   );
