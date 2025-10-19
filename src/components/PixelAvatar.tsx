@@ -49,8 +49,8 @@ export const PixelAvatar = ({ size = "medium", showCoins = true }: PixelAvatarPr
       const { data: profile } = await supabase
         .from("profiles")
         .select("hair_color, hairstyle, eye_color, top, bottom, accessory, coins")
-        .eq("id", user.id)
-        .single();
+        .eq("user_id", user.id)
+        .maybeSingle();
 
       if (profile) {
         console.log("PixelAvatar - Loading profile:", profile);

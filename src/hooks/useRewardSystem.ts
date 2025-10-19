@@ -46,7 +46,7 @@ export const useRewardSystem = () => {
       .from("profiles")
       .select("coins, current_streak, total_check_ins, last_check_in, longest_streak")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (profile) {
       const points = profile.coins || 0;
@@ -56,13 +56,13 @@ export const useRewardSystem = () => {
         streak: profile.current_streak || 0,
         lastCheckIn: profile.last_check_in,
         totalCheckIns: profile.total_check_ins || 0,
-        completedActivities: 0, // This can be tracked separately if needed
+        completedActivities: 0,
       });
     }
   };
 
   // Sync points to database
-  const syncToDatabase = async (newPoints: number, updates: Partial<RewardState> = {}) => {
+  const syncToDatabase = useCallback(async (newPoints: number, updates: Partial<RewardState> = {}) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -76,7 +76,7 @@ export const useRewardSystem = () => {
       .from("profiles")
       .update(dbUpdates)
       .eq("user_id", user.id);
-  };
+  }, []);
 
   // Calculate level based on points
   const calculateLevel = useCallback((points: number) => {
@@ -98,9 +98,6 @@ export const useRewardSystem = () => {
       const newLevel = calculateLevel(newPoints);
       const leveledUp = newLevel > prev.level;
 
-      // Sync to database
-      syncToDatabase(newPoints);
-
       // Show toast notification
       setTimeout(() => {
         toast({
@@ -111,13 +108,18 @@ export const useRewardSystem = () => {
         });
       }, 100);
 
+      // Sync to database after state update
+      setTimeout(() => {
+        syncToDatabase(newPoints);
+      }, 0);
+
       return {
         ...prev,
         points: newPoints,
         level: newLevel,
       };
     });
-  }, [calculateLevel, toast]);
+  }, [calculateLevel, toast, syncToDatabase]);
 
   // Specific reward functions
   const rewardMoodCheckIn = useCallback(() => {
@@ -150,13 +152,6 @@ export const useRewardSystem = () => {
       const newLevel = calculateLevel(newPoints);
       const leveledUp = newLevel > prev.level;
 
-      // Sync to database
-      syncToDatabase(newPoints, { 
-        streak: newStreak, 
-        totalCheckIns: newTotalCheckIns,
-        lastCheckIn: today 
-      });
-
       // Show toast
       setTimeout(() => {
         toast({
@@ -169,6 +164,15 @@ export const useRewardSystem = () => {
         });
       }, 100);
 
+      // Sync to database after state update
+      setTimeout(() => {
+        syncToDatabase(newPoints, { 
+          streak: newStreak, 
+          totalCheckIns: newTotalCheckIns,
+          lastCheckIn: today 
+        });
+      }, 0);
+
       return {
         ...prev,
         points: newPoints,
@@ -178,7 +182,7 @@ export const useRewardSystem = () => {
         totalCheckIns: newTotalCheckIns,
       };
     });
-  }, [calculateLevel, toast]);
+  }, [calculateLevel, toast, syncToDatabase]);
 
   const rewardEventCreation = useCallback(() => {
     awardPoints(REWARD_POINTS.addEvent, "Great job planning ahead!", "📅");
@@ -191,9 +195,6 @@ export const useRewardSystem = () => {
       const newLevel = calculateLevel(newPoints);
       const leveledUp = newLevel > prev.level;
 
-      // Sync to database
-      syncToDatabase(newPoints);
-
       setTimeout(() => {
         toast({
           title: leveledUp ? "🎉 Level Up!" : "🌟 +10 Vibe Energy!",
@@ -203,6 +204,11 @@ export const useRewardSystem = () => {
         });
       }, 100);
 
+      // Sync to database after state update
+      setTimeout(() => {
+        syncToDatabase(newPoints);
+      }, 0);
+
       return {
         ...prev,
         points: newPoints,
@@ -210,7 +216,7 @@ export const useRewardSystem = () => {
         completedActivities: newActivities,
       };
     });
-  }, [calculateLevel, toast]);
+  }, [calculateLevel, toast, syncToDatabase]);
 
   const rewardNotesTaken = useCallback(() => {
     awardPoints(REWARD_POINTS.addNotes, "Reflection helps you grow!", "📝");
