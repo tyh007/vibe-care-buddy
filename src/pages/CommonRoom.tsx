@@ -80,10 +80,7 @@ const CommonRoom = () => {
         created_at,
         user_id,
         flagged,
-        flag_severity,
-        profiles (
-          display_name
-        )
+        flag_severity
       `)
       .order('created_at', { ascending: true })
       .limit(100);
@@ -95,9 +92,28 @@ const CommonRoom = () => {
         description: error.message,
         variant: "destructive"
       });
-    } else if (data) {
-      setMessages(data as Message[]);
+      return;
     }
+
+    // Fetch profiles separately
+    const userIds = [...new Set(data?.map(m => m.user_id) || [])];
+    const { data: profilesData } = await supabase
+      .from('profiles')
+      .select('user_id, display_name')
+      .in('user_id', userIds);
+
+    const profilesMap = new Map(
+      profilesData?.map(p => [p.user_id, p.display_name]) || []
+    );
+
+    const messagesWithProfiles = data?.map(msg => ({
+      ...msg,
+      profiles: {
+        display_name: profilesMap.get(msg.user_id) || 'Anonymous'
+      }
+    })) || [];
+
+    setMessages(messagesWithProfiles as Message[]);
   };
 
   const handleSendMessage = async () => {

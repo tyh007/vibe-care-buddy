@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Calendar, Heart, LogOut, CalendarDays, LayoutGrid, Brain, BookOpen, Tag, Menu, X } from "lucide-react";
+import { Calendar, Heart, LogOut, CalendarDays, LayoutGrid, Brain, BookOpen, Tag, Menu, X, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { MoodTimeline } from "@/components/MoodTimeline";
@@ -311,6 +311,18 @@ const Dashboard = () => {
               <Button
                 variant="ghost"
                 size="sm"
+                onClick={() => {
+                  navigate('/common-room');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full justify-start gap-2"
+              >
+                <Users className="w-4 h-4" />
+                Community Room
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleLogout}
                 className="w-full justify-start gap-2"
               >
@@ -388,6 +400,15 @@ const Dashboard = () => {
                         >
                           <Brain className="w-4 h-4" />
                           CBT Therapist
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate('/common-room')}
+                          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+                        >
+                          <Users className="w-4 h-4" />
+                          Community Room
                         </Button>
                       </div>
                     </div>
