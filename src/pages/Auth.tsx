@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,40 +7,104 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
+  // Check if user is already logged in
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate('/dashboard');
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        navigate('/dashboard');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // TODO: Implement actual signup with Lovable Cloud
-    setTimeout(() => {
-      setIsLoading(false);
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const displayName = formData.get('name') as string;
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            display_name: displayName
+          }
+        }
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Welcome to VibeCare! 🎉",
-        description: "Let's set up your account.",
+        description: "Your account has been created. Redirecting to onboarding...",
       });
+      
+      // Navigate to onboarding after successful signup
       navigate('/onboarding');
-    }, 1500);
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      toast({
+        title: "Signup failed",
+        description: error.message || "Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // TODO: Implement actual login with Lovable Cloud
-    setTimeout(() => {
-      setIsLoading(false);
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Welcome back!",
         description: "Logging you in...",
       });
+      
       navigate('/dashboard');
-    }, 1500);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login failed",
+        description: error.message || "Please check your credentials and try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -79,7 +143,8 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Full Name</Label>
                   <Input 
-                    id="signup-name" 
+                    id="signup-name"
+                    name="name"
                     placeholder="Alex Johnson" 
                     required 
                   />
@@ -88,7 +153,8 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input 
-                    id="signup-email" 
+                    id="signup-email"
+                    name="email"
                     type="email" 
                     placeholder="you@university.edu" 
                     required 
@@ -98,7 +164,8 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
                   <Input 
-                    id="signup-password" 
+                    id="signup-password"
+                    name="password"
                     type="password" 
                     placeholder="••••••••" 
                     required 
@@ -130,7 +197,8 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="login-email">Email</Label>
                   <Input 
-                    id="login-email" 
+                    id="login-email"
+                    name="email"
                     type="email" 
                     placeholder="you@university.edu" 
                     required 
@@ -140,7 +208,8 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="login-password">Password</Label>
                   <Input 
-                    id="login-password" 
+                    id="login-password"
+                    name="password"
                     type="password" 
                     placeholder="••••••••" 
                     required 
