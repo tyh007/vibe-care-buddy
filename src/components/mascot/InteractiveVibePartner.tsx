@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Sparkles, Star, Heart, Settings } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sparkles, Star, Heart, Settings, Mic, MessageSquare } from "lucide-react";
 import { VibePartnerDialog } from "./VibePartnerDialog";
 import { VoiceChat } from "./VoiceChat";
+import { TextChat } from "./TextChat";
 
 interface InteractiveVibePartnerProps {
   points: number;
@@ -169,13 +171,36 @@ export const InteractiveVibePartner = ({
             </div>
           </div>
 
-          {/* Voice controls */}
-          <VoiceChat
-            partnerName={name}
-            partnerType={type}
-            mood={mood}
-            onSpeakingChange={setIsSpeakingOrListening}
-          />
+          {/* Chat Interface */}
+          <Tabs defaultValue="text" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="text" className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                Text Chat
+              </TabsTrigger>
+              <TabsTrigger value="voice" className="flex items-center gap-2">
+                <Mic className="w-4 h-4" />
+                Voice Chat
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="text" className="mt-4">
+              <TextChat
+                partnerName={name}
+                partnerType={type}
+                mood={mood}
+              />
+            </TabsContent>
+            
+            <TabsContent value="voice" className="mt-4">
+              <VoiceChat
+                partnerName={name}
+                partnerType={type}
+                mood={mood}
+                onSpeakingChange={setIsSpeakingOrListening}
+              />
+            </TabsContent>
+          </Tabs>
 
           {/* Energy Progress */}
           <div className="space-y-3">

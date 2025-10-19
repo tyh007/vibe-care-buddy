@@ -92,40 +92,67 @@ export const VoiceChat = ({ partnerName, partnerType, mood, onSpeakingChange }: 
   const speak = async (text: string) => {
     if (!synthRef.current) return;
 
-    // Cancel any ongoing speech
-    synthRef.current.cancel();
+    return new Promise<void>((resolve, reject) => {
+      // Cancel any ongoing speech
+      synthRef.current!.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
+      // Small delay to ensure cancel completes
+      setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        utterance.lang = 'en-US';
 
-    // Try to use a natural voice
-    const voices = synthRef.current.getVoices();
-    const preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Female')) 
-      || voices.find(v => v.lang.startsWith('en'));
-    
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
+        // Load voices and try to use a natural one
+        const voices = synthRef.current!.getVoices();
+        if (voices.length === 0) {
+          // If voices not loaded yet, wait for them
+          synthRef.current!.addEventListener('voiceschanged', () => {
+            const newVoices = synthRef.current!.getVoices();
+            const preferredVoice = newVoices.find(v => v.lang.startsWith('en') && (v.name.includes('Female') || v.name.includes('Samantha'))) 
+              || newVoices.find(v => v.lang.startsWith('en'));
+            if (preferredVoice) {
+              utterance.voice = preferredVoice;
+            }
+          }, { once: true });
+        } else {
+          const preferredVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Female') || v.name.includes('Samantha'))) 
+            || voices.find(v => v.lang.startsWith('en'));
+          if (preferredVoice) {
+            utterance.voice = preferredVoice;
+          }
+        }
 
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-      onSpeakingChange(true);
-    };
+        utterance.onstart = () => {
+          setIsSpeaking(true);
+          onSpeakingChange(true);
+        };
 
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      onSpeakingChange(false);
-    };
+        utterance.onend = () => {
+          setIsSpeaking(false);
+          onSpeakingChange(false);
+          resolve();
+        };
 
-    utterance.onerror = (event) => {
-      console.error('Speech synthesis error:', event);
-      setIsSpeaking(false);
-      onSpeakingChange(false);
-    };
+        utterance.onerror = (event) => {
+          console.error('Speech synthesis error:', event);
+          // Don't show error to user, just silently fail
+          setIsSpeaking(false);
+          onSpeakingChange(false);
+          reject(event);
+        };
 
-    synthRef.current.speak(utterance);
+        try {
+          synthRef.current!.speak(utterance);
+        } catch (error) {
+          console.error('Error speaking:', error);
+          setIsSpeaking(false);
+          onSpeakingChange(false);
+          reject(error);
+        }
+      }, 100);
+    });
   };
 
   const startListening = async () => {
