@@ -4,12 +4,30 @@ import { Card } from "@/components/ui/card";
 import { Calendar, Heart, Plus, Settings, LogOut, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { MoodTimeline } from "@/components/MoodTimeline";
+import { format, subDays } from "date-fns";
+
+interface MoodEntry {
+  date: string;
+  mood: number;
+  events: string[];
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
-  const [moodHistory, setMoodHistory] = useState<number[]>([60, 75, 55, 80, 70, 85, 90]);
+  
+  // Sample mood data with dates and events (last 7 days)
+  const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([
+    { date: format(subDays(new Date(), 6), 'yyyy-MM-dd'), mood: 3, events: ['CS101 Lecture', 'Study Group'] },
+    { date: format(subDays(new Date(), 5), 'yyyy-MM-dd'), mood: 4, events: ['Gym', 'Coffee with friends'] },
+    { date: format(subDays(new Date(), 4), 'yyyy-MM-dd'), mood: 3, events: ['Statistics Exam', 'Library Session'] },
+    { date: format(subDays(new Date(), 3), 'yyyy-MM-dd'), mood: 4, events: ['CS Lab', 'Meditation'] },
+    { date: format(subDays(new Date(), 2), 'yyyy-MM-dd'), mood: 4, events: ['Group Project', 'Yoga Class'] },
+    { date: format(subDays(new Date(), 1), 'yyyy-MM-dd'), mood: 5, events: ['Volunteer Work', 'Movie Night'] },
+    { date: format(new Date(), 'yyyy-MM-dd'), mood: 5, events: ['Morning Walk', 'Productive Study Session'] },
+  ]);
 
   const handleLogout = () => {
     // TODO: Implement actual logout
@@ -18,10 +36,24 @@ const Dashboard = () => {
 
   const handleMoodSelect = (moodIndex: number) => {
     setSelectedMood(moodIndex);
+    const mood = moodIndex + 1; // Convert 0-4 index to 1-5 scale
     
-    // Update mood history (add new mood value)
-    const newMoodValue = (moodIndex + 1) * 20; // Convert 0-4 index to 20-100 scale
-    setMoodHistory([...moodHistory.slice(1), newMoodValue]);
+    // Get today's events from the schedule (simplified - in real app would come from calendar)
+    const todayEvents = ['Morning Walk', 'Productive Study Session'];
+    
+    // Update mood history - replace today's entry or add new one
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const newEntry: MoodEntry = { date: today, mood, events: todayEvents };
+    
+    setMoodHistory(prev => {
+      const existingIndex = prev.findIndex(entry => entry.date === today);
+      if (existingIndex >= 0) {
+        const updated = [...prev];
+        updated[existingIndex] = newEntry;
+        return updated;
+      }
+      return [...prev.slice(1), newEntry];
+    });
     
     // Show feedback toast
     const moodLabels = ['struggling today', 'not feeling great', 'doing okay', 'feeling good', 'feeling great'];
@@ -127,29 +159,8 @@ const Dashboard = () => {
               </div>
             </Card>
 
-            {/* Mood Timeline Preview */}
-            <Card className="p-6 space-y-4 bg-card shadow-soft">
-              <h3 className="font-semibold text-lg text-card-foreground">This Week's Mood</h3>
-              
-              <div className="h-32 flex items-end justify-between gap-2">
-                {moodHistory.map((height, idx) => (
-                  <div key={idx} className="flex-1 flex flex-col items-center gap-2">
-                    <div 
-                      className="w-full bg-gradient-primary rounded-t-lg transition-all hover:opacity-80 cursor-pointer"
-                      style={{ height: `${height}%` }}
-                      title={`Mood: ${height}%`}
-                    />
-                    <span className="text-xs text-muted-foreground">
-                      {['M', 'T', 'W', 'T', 'F', 'S', 'S'][idx]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              
-              <p className="text-sm text-muted-foreground text-center">
-                Trending upward! 📈
-              </p>
-            </Card>
+            {/* Interactive Mood Timeline */}
+            <MoodTimeline data={moodHistory} />
           </div>
 
           {/* Right Column: Calendar View */}
