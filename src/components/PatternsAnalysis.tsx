@@ -220,11 +220,13 @@ export const PatternsAnalysis = () => {
 
   if (patterns.length === 0) {
     return (
-      <Card className="p-6 animate-fade-in">
-        <h3 className="text-xl font-semibold mb-4">Pattern Analysis</h3>
-        <div className="text-center py-8">
-          <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-          <p className="text-muted-foreground">
+      <Card className="p-8 animate-fade-in glass border-2 border-border/50 shadow-medium">
+        <h3 className="text-2xl font-display font-bold mb-6 gradient-text">Pattern Analysis</h3>
+        <div className="text-center py-12">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-primary/10 flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-10 h-10 text-primary" />
+          </div>
+          <p className="text-muted-foreground text-lg leading-relaxed max-w-md mx-auto">
             Keep logging your mood, health data, and screen time for a few days to see patterns!
           </p>
         </div>
@@ -233,26 +235,33 @@ export const PatternsAnalysis = () => {
   }
 
   return (
-    <Card className="p-6 animate-fade-in">
-      <h3 className="text-xl font-semibold mb-4">Detected Patterns</h3>
-      <div className="space-y-3">
+    <Card className="p-8 animate-fade-in glass border-2 border-border/50 shadow-medium">
+      <h3 className="text-2xl font-display font-bold mb-6 gradient-text">Detected Patterns</h3>
+      <div className="space-y-4">
         {patterns.map((pattern, index) => (
           <div
             key={index}
-            className="flex items-start gap-3 p-4 rounded-lg border border-border hover-scale"
+            className="flex items-start gap-4 p-5 rounded-xl glass border-2 border-border/50 hover-lift transition-all group"
+            style={{ animationDelay: `${index * 100}ms` }}
           >
-            {pattern.correlation === "positive" && (
-              <TrendingUp className="w-5 h-5 text-green-500 mt-0.5" />
-            )}
-            {pattern.correlation === "negative" && (
-              <TrendingDown className="w-5 h-5 text-orange-500 mt-0.5" />
-            )}
-            {pattern.correlation === "neutral" && (
-              <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5" />
-            )}
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-soft ${
+              pattern.correlation === "positive" ? "bg-green-500/10" :
+              pattern.correlation === "negative" ? "bg-orange-500/10" :
+              "bg-blue-500/10"
+            }`}>
+              {pattern.correlation === "positive" && (
+                <TrendingUp className="w-6 h-6 text-green-500" />
+              )}
+              {pattern.correlation === "negative" && (
+                <TrendingDown className="w-6 h-6 text-orange-500" />
+              )}
+              {pattern.correlation === "neutral" && (
+                <AlertCircle className="w-6 h-6 text-blue-500" />
+              )}
+            </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-medium">{pattern.factor}</span>
+              <div className="flex items-center gap-3 mb-2">
+                <span className="font-display font-bold text-lg">{pattern.factor}</span>
                 <Badge
                   variant={
                     pattern.correlation === "positive"
@@ -261,12 +270,12 @@ export const PatternsAnalysis = () => {
                       ? "destructive"
                       : "secondary"
                   }
-                  className="text-xs"
+                  className="text-xs font-semibold"
                 >
                   {pattern.correlation}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground">{pattern.insight}</p>
+              <p className="text-muted-foreground leading-relaxed">{pattern.insight}</p>
             </div>
           </div>
         ))}

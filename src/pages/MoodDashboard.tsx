@@ -1,3 +1,8 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { StatsCards } from "@/components/StatsCards";
 import { MoodSelector } from "@/components/MoodSelector";
 import { MoodChart } from "@/components/MoodChart";
@@ -6,11 +11,6 @@ import { DataControls } from "@/components/DataControls";
 import { LocationChart } from "@/components/LocationChart";
 import { MoodMap } from "@/components/MoodMap";
 import { PixelAvatar } from "@/components/PixelAvatar";
-import { Button } from "@/components/ui/button";
-import heroBackground from "@/assets/hero-background.jpg";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart } from "lucide-react";
 import { initializeMockData } from "@/utils/mockData";
 
 const MoodDashboard = () => {
@@ -98,35 +98,47 @@ const MoodDashboard = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-forest">
+    <div className="min-h-screen bg-gradient-hero">
       {/* Header with Back Button */}
-      <div className="sticky top-0 z-50 bg-card/75 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/dashboard')}
-              className="gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Button>
-            <div className="flex items-center gap-2">
-              <Heart className="w-5 h-5 text-primary" />
-              <h1 className="text-2xl font-bold text-foreground">Mood Analytics</h1>
+      <div className="sticky top-0 z-50 glass border-b border-border/50 shadow-soft">
+        <div className="container mx-auto px-6 py-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/dashboard')}
+                className="gap-2 hover:bg-primary/10"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </Button>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-medium">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                </div>
+                <h1 className="text-3xl font-display font-bold gradient-text">Mood Analytics</h1>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-8 space-y-8">
+      <div className="container mx-auto px-6 py-10 space-y-10">
+        <div className="text-center max-w-3xl mx-auto animate-fade-in">
+          <p className="text-xl text-muted-foreground leading-relaxed">
+            Track your wellness journey with detailed insights and patterns
+          </p>
+        </div>
+
         <DataControls />
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-slide-up">
           <div className="lg:col-span-1">
-            <PixelAvatar size="medium" />
+            <Card className="glass border-2 border-primary/20 p-6 hover-lift shadow-medium">
+              <PixelAvatar size="medium" />
+            </Card>
           </div>
           <div className="lg:col-span-2">
             <StatsCards />
@@ -139,7 +151,7 @@ const MoodDashboard = () => {
 
         {locationData.length > 0 && <LocationChart data={locationData} />}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <MoodSelector />
           <MoodChart />
         </div>

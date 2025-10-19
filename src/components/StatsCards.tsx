@@ -36,42 +36,49 @@ export const StatsCards = () => {
       title: "Total Check-ins",
       value: stats.totalEntries,
       icon: Calendar,
-      color: "text-blue-500",
+      gradient: "from-blue-500 to-blue-600",
+      iconBg: "bg-blue-500/10",
     },
     {
       title: "Current Streak",
       value: `${stats.currentStreak} days`,
       icon: TrendingUp,
-      color: "text-green-500",
+      gradient: "from-green-500 to-green-600",
+      iconBg: "bg-green-500/10",
     },
     {
       title: "Average Mood",
       value: `${stats.averageMood}/5`,
       icon: Smile,
-      color: "text-yellow-500",
+      gradient: "from-amber-500 to-amber-600",
+      iconBg: "bg-amber-500/10",
     },
     {
       title: "Weekly Goal",
       value: `${Math.round(stats.weeklyGoal)}%`,
       icon: Target,
-      color: "text-purple-500",
+      gradient: "from-purple-500 to-purple-600",
+      iconBg: "bg-purple-500/10",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map((card, index) => (
         <Card
           key={card.title}
-          className="p-6 animate-fade-in hover-scale cursor-pointer"
+          className="p-6 animate-fade-in hover-lift glass border-2 border-border/50 shadow-medium group cursor-pointer relative overflow-hidden"
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">{card.title}</p>
-              <p className="text-3xl font-bold">{card.value}</p>
+          <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
+          <div className="relative flex flex-col gap-4">
+            <div className={`w-12 h-12 rounded-xl ${card.iconBg} flex items-center justify-center`}>
+              <card.icon className={`w-6 h-6 bg-gradient-to-br ${card.gradient} bg-clip-text text-transparent`} style={{ WebkitTextFillColor: 'transparent' }} />
             </div>
-            <card.icon className={`w-8 h-8 ${card.color}`} />
+            <div>
+              <p className="text-sm text-muted-foreground font-medium mb-1">{card.title}</p>
+              <p className="text-3xl font-display font-bold text-foreground">{card.value}</p>
+            </div>
           </div>
         </Card>
       ))}
