@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { PixelAvatar } from "@/components/PixelAvatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Heart } from "lucide-react";
 
 interface ShopItem {
   id: string;
@@ -144,6 +146,7 @@ const ItemIcon = ({ icon, category }: { icon: string; category: string }) => {
 };
 
 const Shop = () => {
+  const navigate = useNavigate();
   const [items, setItems] = useState<ShopItem[]>([]);
   const [coins, setCoins] = useState(0);
   const [inventory, setInventory] = useState<string[]>([]);
@@ -343,34 +346,39 @@ const Shop = () => {
   }, {} as Record<string, InventoryItem[]>);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 via-yellow-50 to-blue-50 dark:from-gray-900 dark:via-green-950 dark:to-blue-950">
+    <div className="min-h-screen bg-forest">
+      {/* Header with Back Button */}
+      <div className="sticky top-0 z-50 bg-card/75 backdrop-blur-sm border-b border-border">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/dashboard')}
+              className="gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Button>
+            <div className="flex items-center gap-2">
+              <Heart className="w-5 h-5 text-primary" />
+              <h1 className="text-2xl font-bold text-foreground">Avatar Shop</h1>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="container mx-auto px-6 py-8 space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 
-              className="text-5xl font-bold mb-2 animate-fade-in text-amber-900 dark:text-amber-100" 
-              style={{ 
-                fontFamily: 'monospace',
-                textShadow: '3px 3px 0px rgba(139, 69, 19, 0.3)',
-                imageRendering: 'pixelated'
-              }}
-            >
-              🛒 Village Shop
-            </h1>
-            <p className="text-lg text-amber-800 dark:text-amber-200 animate-fade-in font-semibold">
-              Customize your character! 
+            <p className="text-lg text-muted-foreground animate-fade-in">
+              Customize your character and express yourself! 
             </p>
           </div>
-          <div 
-            className="flex items-center gap-3 px-8 py-4 bg-gradient-to-br from-yellow-400 via-amber-400 to-orange-400 dark:from-yellow-600 dark:via-amber-600 dark:to-orange-600 rounded-lg shadow-xl border-4 border-amber-900/30"
-            style={{
-              boxShadow: '0 4px 0 rgba(139, 69, 19, 0.3), 0 8px 12px rgba(0,0,0,0.2)',
-              imageRendering: 'pixelated'
-            }}
-          >
-            <span className="text-3xl drop-shadow-md">🪙</span>
-            <span className="text-3xl font-bold text-amber-900 dark:text-amber-100" style={{ fontFamily: 'monospace' }}>{coins}</span>
-          </div>
+          <Card className="flex items-center gap-3 px-6 py-3 bg-card/75 backdrop-blur-sm border-2 border-primary/20">
+            <span className="text-2xl">🪙</span>
+            <span className="text-2xl font-bold text-primary">{coins}</span>
+          </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -380,22 +388,11 @@ const Shop = () => {
 
           <div className="lg:col-span-2">
             <Tabs defaultValue="shop" className="w-full">
-              <TabsList 
-                className="grid w-full grid-cols-2 mb-6 bg-amber-100 dark:bg-amber-900 border-4 border-amber-900/30 h-14"
-                style={{ boxShadow: '0 4px 0 rgba(139, 69, 19, 0.2)' }}
-              >
-                <TabsTrigger 
-                  value="shop" 
-                  className="text-lg font-bold data-[state=active]:bg-amber-300 dark:data-[state=active]:bg-amber-700"
-                  style={{ fontFamily: 'monospace' }}
-                >
+              <TabsList className="grid w-full grid-cols-2 mb-6 h-12">
+                <TabsTrigger value="shop" className="text-base font-semibold">
                   🛍️ Shop
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="dressup" 
-                  className="text-lg font-bold data-[state=active]:bg-amber-300 dark:data-[state=active]:bg-amber-700"
-                  style={{ fontFamily: 'monospace' }}
-                >
+                <TabsTrigger value="dressup" className="text-base font-semibold">
                   ✨ Wardrobe
                 </TabsTrigger>
               </TabsList>
@@ -403,13 +400,10 @@ const Shop = () => {
               <TabsContent value="shop" className="space-y-6">
                 {Object.entries(groupedItems).map(([category, categoryItems]) => (
                   <div key={category}>
-                    <div 
-                      className="flex items-center gap-3 mb-4 px-4 py-2 bg-amber-100 dark:bg-amber-900 rounded-lg border-2 border-amber-900/30"
-                      style={{ boxShadow: '0 2px 0 rgba(139, 69, 19, 0.2)' }}
-                    >
-                      <span className="text-3xl">{categoryIcons[category as keyof typeof categoryIcons]}</span>
-                      <h2 className="text-2xl font-bold capitalize text-amber-900 dark:text-amber-100" style={{ fontFamily: 'monospace' }}>
-                        {category}
+                    <div className="flex items-center gap-3 mb-4 px-4 py-2 bg-card/50 rounded-lg border border-border">
+                      <span className="text-2xl">{categoryIcons[category as keyof typeof categoryIcons]}</span>
+                      <h2 className="text-xl font-semibold capitalize text-foreground">
+                        {category.replace('_', ' ')}
                       </h2>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -418,44 +412,33 @@ const Shop = () => {
                         return (
                           <Card 
                             key={item.id} 
-                            className={`p-6 flex flex-col hover:shadow-2xl transition-all border-4 ${
+                            className={`p-6 flex flex-col hover:shadow-lg transition-all bg-card/75 backdrop-blur-sm ${
                               owned 
-                                ? 'border-green-600 dark:border-green-400 bg-green-50 dark:bg-green-950' 
-                                : 'border-amber-900/20 bg-gradient-to-br from-white to-amber-50 dark:from-gray-800 dark:to-amber-950'
+                                ? 'border-2 border-primary' 
+                                : 'border border-border'
                             }`}
-                            style={{ 
-                              boxShadow: owned 
-                                ? '0 4px 0 rgba(22, 163, 74, 0.3), 0 8px 12px rgba(0,0,0,0.2)' 
-                                : '0 4px 0 rgba(139, 69, 19, 0.2), 0 8px 12px rgba(0,0,0,0.1)',
-                              imageRendering: 'pixelated'
-                            }}
                           >
                             <div className="mb-4 flex justify-center">
                               <ItemIcon icon={item.icon} category={item.category} />
                             </div>
-                            <h3 className="font-bold text-xl mb-2 text-amber-900 dark:text-amber-100" style={{ fontFamily: 'monospace' }}>
+                            <h3 className="font-semibold text-lg mb-2 text-foreground">
                               {item.name}
                             </h3>
-                            <p className="text-sm text-amber-800 dark:text-amber-200 mb-4 flex-1">
+                            <p className="text-sm text-muted-foreground mb-4 flex-1">
                               {item.description}
                             </p>
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 px-3 py-1 bg-amber-200 dark:bg-amber-800 rounded-md border-2 border-amber-900/30">
-                                <span className="text-2xl">🪙</span>
-                                <span className="font-bold text-xl text-amber-900 dark:text-amber-100" style={{ fontFamily: 'monospace' }}>
+                              <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-md">
+                                <span className="text-xl">🪙</span>
+                                <span className="font-bold text-lg text-primary">
                                   {item.price}
                                 </span>
                               </div>
                               <Button
                                 onClick={() => handlePurchase(item)}
                                 disabled={owned || loading === item.id || item.price === 0}
-                                size="lg"
+                                size="sm"
                                 variant={owned ? "secondary" : "default"}
-                                className="font-bold"
-                                style={{ 
-                                  fontFamily: 'monospace',
-                                  boxShadow: '0 3px 0 rgba(0, 0, 0, 0.2)'
-                                }}
                               >
                                 {owned ? "✓ Owned" : loading === item.id ? "Buying..." : item.price === 0 ? "Free!" : "Buy"}
                               </Button>

@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { MoodSelector } from "@/components/MoodSelector";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Heart } from "lucide-react";
 
 interface MoodEntry {
   mood: number;
@@ -20,6 +23,7 @@ const moodEmojis: { [key: number]: string } = {
 };
 
 const MoodTracker = () => {
+  const navigate = useNavigate();
   const [entries, setEntries] = useState<MoodEntry[]>([]);
 
   useEffect(() => {
@@ -36,12 +40,32 @@ const MoodTracker = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-forest">
+      {/* Header with Back Button */}
+      <div className="sticky top-0 z-50 bg-card/75 backdrop-blur-sm border-b border-border">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/dashboard')}
+              className="gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Button>
+            <div className="flex items-center gap-2">
+              <Heart className="w-5 h-5 text-primary" />
+              <h1 className="text-2xl font-bold text-foreground">Mood Tracker</h1>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="container mx-auto px-6 py-8 space-y-8">
         <div>
-          <h1 className="text-4xl font-bold mb-2 animate-fade-in">Mood Tracker</h1>
           <p className="text-lg text-muted-foreground animate-fade-in">
-            Track your emotional journey
+            Track your emotional journey and patterns
           </p>
         </div>
 
@@ -51,14 +75,14 @@ const MoodTracker = () => {
           <h2 className="text-2xl font-semibold mb-4">Recent Entries</h2>
           <div className="space-y-3">
             {entries.length === 0 ? (
-              <Card className="p-8 text-center">
+              <Card className="p-8 text-center bg-card/75 backdrop-blur-sm">
                 <p className="text-muted-foreground">No mood entries yet. Start tracking!</p>
               </Card>
             ) : (
               entries.map((entry, index) => (
                 <Card
                   key={index}
-                  className="p-4 animate-fade-in hover-scale"
+                  className="p-4 animate-fade-in hover-scale bg-card/75 backdrop-blur-sm"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-start gap-4">

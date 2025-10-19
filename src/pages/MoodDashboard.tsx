@@ -6,11 +6,15 @@ import { DataControls } from "@/components/DataControls";
 import { LocationChart } from "@/components/LocationChart";
 import { MoodMap } from "@/components/MoodMap";
 import { PixelAvatar } from "@/components/PixelAvatar";
+import { Button } from "@/components/ui/button";
 import heroBackground from "@/assets/hero-background.jpg";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Heart } from "lucide-react";
 import { initializeMockData } from "@/utils/mockData";
 
-const Dashboard = () => {
+const MoodDashboard = () => {
+  const navigate = useNavigate();
   const [locationData, setLocationData] = useState<any[]>([]);
   const [mapLocationData, setMapLocationData] = useState<any[]>([]);
 
@@ -94,24 +98,25 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden border-b border-border">
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `url(${heroBackground})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-        <div className="relative container mx-auto px-6 py-12">
-          <h1 className="text-4xl font-bold mb-2 animate-fade-in">
-            Welcome Back
-          </h1>
-          <p className="text-lg text-muted-foreground animate-fade-in">
-            How are you feeling today?
-          </p>
+    <div className="min-h-screen bg-forest">
+      {/* Header with Back Button */}
+      <div className="sticky top-0 z-50 bg-card/75 backdrop-blur-sm border-b border-border">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/dashboard')}
+              className="gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Button>
+            <div className="flex items-center gap-2">
+              <Heart className="w-5 h-5 text-primary" />
+              <h1 className="text-2xl font-bold text-foreground">Mood Analytics</h1>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -143,4 +148,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default MoodDashboard;
