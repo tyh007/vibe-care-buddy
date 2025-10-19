@@ -184,38 +184,38 @@ export const MoodSelector = () => {
   };
 
   return (
-    <Card className="p-6 animate-fade-in">
-      <h3 className="text-xl font-semibold mb-4">How are you feeling?</h3>
+    <Card className="p-8 animate-fade-in glass border-2 border-border/50 shadow-medium hover-lift">
+      <h3 className="text-2xl font-display font-bold mb-6 gradient-text">How are you feeling?</h3>
       
-      <div className="grid grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-5 gap-3 mb-8">
         {moods.map((mood) => (
           <button
             key={mood.value}
             onClick={() => setSelectedMood(mood.value)}
             className={`
-              flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all
+              flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-spring
               ${
                 selectedMood === mood.value
-                  ? "border-primary bg-primary/10 scale-110"
-                  : "border-border hover:border-primary/50 hover:scale-105"
+                  ? "border-primary bg-gradient-primary/10 scale-110 shadow-medium"
+                  : "border-border/50 hover:border-primary/50 hover:scale-105 hover:shadow-soft"
               }
             `}
           >
-            <span className="text-4xl">{mood.emoji}</span>
-            <span className="text-sm font-medium">{mood.label}</span>
+            <span className="text-5xl">{mood.emoji}</span>
+            <span className="text-sm font-semibold">{mood.label}</span>
           </button>
         ))}
       </div>
 
       {selectedMoodData && (
-        <div className="mb-6 animate-fade-in">
-          <h4 className="font-medium mb-3">Why are you feeling {selectedMoodData.label.toLowerCase()}?</h4>
+        <div className="mb-6 animate-fade-in p-5 rounded-xl glass border border-border/50">
+          <h4 className="font-display font-bold text-lg mb-4">Why are you feeling {selectedMoodData.label.toLowerCase()}?</h4>
           <div className="flex flex-wrap gap-2">
             {selectedMoodData.prompts.map((prompt) => (
               <Badge
                 key={prompt}
                 variant={selectedReasons.includes(prompt) ? "default" : "outline"}
-                className="cursor-pointer transition-all hover:scale-105"
+                className="cursor-pointer transition-spring hover:scale-105 text-sm py-1.5 px-3"
                 onClick={() => toggleReason(prompt)}
               >
                 {prompt}
@@ -229,10 +229,10 @@ export const MoodSelector = () => {
         placeholder="Add any additional notes (optional)"
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        className="mb-4 min-h-[100px]"
+        className="mb-6 min-h-[120px] rounded-xl"
       />
 
-      <Button onClick={handleSave} className="w-full">
+      <Button onClick={handleSave} className="w-full" size="lg">
         Save Mood Entry
       </Button>
     </Card>

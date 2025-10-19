@@ -23,20 +23,20 @@ export const DataControls = () => {
   };
 
   return (
-    <Card className="p-4 flex items-center justify-between">
+    <Card className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass border-2 border-border/50 shadow-medium">
       <div>
-        <p className="text-sm font-medium">Mock Data Controls</p>
-        <p className="text-xs text-muted-foreground">
-          Demo mode - sample data is loaded
+        <p className="text-base font-display font-bold text-foreground">Demo Mode</p>
+        <p className="text-sm text-muted-foreground">
+          Sample data is loaded for testing and exploration
         </p>
       </div>
-      <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={handleRefresh}>
-          <RefreshCw className="w-4 h-4 mr-2" />
+      <div className="flex gap-3">
+        <Button variant="outline" size="sm" onClick={handleRefresh} className="gap-2">
+          <RefreshCw className="w-4 h-4" />
           Regenerate
         </Button>
-        <Button variant="outline" size="sm" onClick={handleClear}>
-          <Trash2 className="w-4 h-4 mr-2" />
+        <Button variant="outline" size="sm" onClick={handleClear} className="gap-2">
+          <Trash2 className="w-4 h-4" />
           Clear All
         </Button>
       </div>

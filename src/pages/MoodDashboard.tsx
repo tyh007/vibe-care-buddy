@@ -125,36 +125,67 @@ const MoodDashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-10 space-y-10">
-        <div className="text-center max-w-3xl mx-auto animate-fade-in">
+      <div className="container mx-auto px-6 py-10 space-y-12">
+        {/* Hero Section */}
+        <div className="text-center max-w-3xl mx-auto space-y-4 animate-fade-in">
           <p className="text-xl text-muted-foreground leading-relaxed">
             Track your wellness journey with detailed insights and patterns
           </p>
+          <DataControls />
         </div>
 
-        <DataControls />
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-slide-up">
-          <div className="lg:col-span-1">
-            <Card className="glass border-2 border-primary/20 p-6 hover-lift shadow-medium">
-              <PixelAvatar size="medium" />
-            </Card>
+        {/* Overview Section */}
+        <section className="space-y-6 animate-slide-up">
+          <div className="flex items-center gap-3">
+            <div className="h-1 w-12 bg-gradient-primary rounded-full" />
+            <h2 className="text-2xl font-display font-bold text-foreground">Your Overview</h2>
           </div>
-          <div className="lg:col-span-2">
-            <StatsCards />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-4">
+              <Card className="glass border-2 border-primary/20 p-6 hover-lift shadow-medium h-full flex items-center justify-center">
+                <PixelAvatar size="medium" />
+              </Card>
+            </div>
+            <div className="lg:col-span-8">
+              <StatsCards />
+            </div>
           </div>
-        </div>
+        </section>
 
-        <PatternsAnalysis />
+        {/* Insights Section */}
+        <section className="space-y-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <div className="flex items-center gap-3">
+            <div className="h-1 w-12 bg-gradient-accent rounded-full" />
+            <h2 className="text-2xl font-display font-bold text-foreground">Smart Insights</h2>
+          </div>
+          <PatternsAnalysis />
+        </section>
 
-        {mapLocationData.length > 0 && <MoodMap locationData={mapLocationData} />}
+        {/* Trends Section */}
+        <section className="space-y-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="flex items-center gap-3">
+            <div className="h-1 w-12 bg-gradient-primary rounded-full" />
+            <h2 className="text-2xl font-display font-bold text-foreground">Mood Trends</h2>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <MoodChart />
+            <MoodSelector />
+          </div>
+        </section>
 
-        {locationData.length > 0 && <LocationChart data={locationData} />}
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <MoodSelector />
-          <MoodChart />
-        </div>
+        {/* Location Analytics Section */}
+        {(mapLocationData.length > 0 || locationData.length > 0) && (
+          <section className="space-y-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            <div className="flex items-center gap-3">
+              <div className="h-1 w-12 bg-gradient-accent rounded-full" />
+              <h2 className="text-2xl font-display font-bold text-foreground">Location Analytics</h2>
+            </div>
+            <div className="space-y-6">
+              {mapLocationData.length > 0 && <MoodMap locationData={mapLocationData} />}
+              {locationData.length > 0 && <LocationChart data={locationData} />}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
