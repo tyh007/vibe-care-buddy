@@ -23,8 +23,8 @@ export const Layout = ({ children }: LayoutProps) => {
       <div className="min-h-screen flex w-full bg-gradient-hero">
         <AppSidebar />
         <div className="flex-1 flex flex-col">
-          <header className="h-12 flex items-center border-b border-border/50 bg-card/30 backdrop-blur-sm px-4">
-            <SidebarTrigger />
+          <header className="h-14 flex items-center border-b border-border/50 bg-card/40 backdrop-blur-lg px-6 shadow-soft">
+            <SidebarTrigger className="hover:bg-muted/50 rounded-lg transition-all" />
           </header>
           <main className="flex-1 overflow-auto page-transition">
             {children}
