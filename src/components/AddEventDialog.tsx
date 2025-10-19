@@ -18,6 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface Event {
   id: string;
@@ -26,12 +31,14 @@ interface Event {
   end: string;
   category: string;
   notes?: string;
+  color?: string;
 }
 
 interface AddEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddEvent: (event: Omit<Event, 'id'>) => void;
+  onAddEvent: (event: Omit<Event, 'id'> & { date?: Date }) => void;
+  initialDate?: Date;
 }
 
 const categories = [
@@ -42,8 +49,9 @@ const categories = [
   { value: "other", label: "Other", color: "muted" },
 ];
 
-export const AddEventDialog = ({ open, onOpenChange, onAddEvent }: AddEventDialogProps) => {
+export const AddEventDialog = ({ open, onOpenChange, onAddEvent, initialDate }: AddEventDialogProps) => {
   const [title, setTitle] = useState("");
+  const [date, setDate] = useState<Date | undefined>(initialDate || new Date());
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [category, setCategory] = useState("class");
@@ -52,7 +60,7 @@ export const AddEventDialog = ({ open, onOpenChange, onAddEvent }: AddEventDialo
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title || !start || !end) {
+    if (!title || !start || !end || !date) {
       return;
     }
 
@@ -62,10 +70,12 @@ export const AddEventDialog = ({ open, onOpenChange, onAddEvent }: AddEventDialo
       end,
       category,
       notes,
+      date,
     });
 
     // Reset form
     setTitle("");
+    setDate(new Date());
     setStart("");
     setEnd("");
     setCategory("class");
@@ -93,6 +103,33 @@ export const AddEventDialog = ({ open, onOpenChange, onAddEvent }: AddEventDialo
                 onChange={(e) => setTitle(e.target.value)}
                 required
               />
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "justify-start text-left font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="grid gap-2">

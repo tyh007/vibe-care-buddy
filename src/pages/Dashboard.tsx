@@ -130,9 +130,14 @@ const Dashboard = () => {
     setIsAddEventOpen(true);
   };
 
-  const handleEventCreate = (newEvent: Omit<CalendarEvent, 'id'>) => {
+  const handleEventCreate = (newEvent: Omit<CalendarEvent, 'id'> & { date?: Date }) => {
     const event: CalendarEvent = {
-      ...newEvent,
+      title: newEvent.title,
+      start: newEvent.start,
+      end: newEvent.end,
+      category: newEvent.category,
+      notes: newEvent.notes,
+      color: newEvent.color,
       id: Date.now().toString(),
     };
     
@@ -141,6 +146,26 @@ const Dashboard = () => {
     toast({
       title: "Event Added! 🎉",
       description: `${event.title} has been added to your schedule.`,
+    });
+  };
+
+  const handleEventUpdate = (eventId: string, updates: Partial<CalendarEvent>) => {
+    setEvents(events.map(e => 
+      e.id === eventId ? { ...e, ...updates } : e
+    ));
+    
+    toast({
+      title: "Event Updated! ✏️",
+      description: "Your changes have been saved.",
+    });
+  };
+
+  const handleEventDelete = (eventId: string) => {
+    setEvents(events.filter(e => e.id !== eventId));
+    
+    toast({
+      title: "Event Deleted! 🗑️",
+      description: "The event has been removed from your calendar.",
     });
   };
 
@@ -376,6 +401,8 @@ const Dashboard = () => {
         isOpen={isNotesOpen}
         onClose={() => setIsNotesOpen(false)}
         onSave={handleSaveNotes}
+        onUpdate={handleEventUpdate}
+        onDelete={handleEventDelete}
       />
 
       {/* Add Event Dialog */}
