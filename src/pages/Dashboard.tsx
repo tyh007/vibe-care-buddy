@@ -46,6 +46,9 @@ const Dashboard = () => {
   const [partnerName, setPartnerName] = useState(() => 
     localStorage.getItem('vibePartnerName') || 'Vibe Buddy'
   );
+  const [partnerType, setPartnerType] = useState<'cat' | 'panda'>(() => 
+    (localStorage.getItem('vibePartnerType') as 'cat' | 'panda') || 'cat'
+  );
   
   // Sample mood data with dates and events (last 7 days)
   const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([
@@ -303,8 +306,12 @@ const Dashboard = () => {
               points={rewardSystem.points}
               level={rewardSystem.level}
               name={partnerName}
+              type={partnerType}
               mood={moodHistory[moodHistory.length - 1]?.mood}
-              onCustomize={() => setPartnerName(localStorage.getItem('vibePartnerName') || 'Vibe Buddy')}
+              onCustomize={() => {
+                setPartnerName(localStorage.getItem('vibePartnerName') || 'Vibe Buddy');
+                setPartnerType((localStorage.getItem('vibePartnerType') as 'cat' | 'panda') || 'cat');
+              }}
             />
 
             {/* Quick Mood Check-In */}

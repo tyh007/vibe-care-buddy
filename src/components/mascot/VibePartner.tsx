@@ -10,32 +10,71 @@ interface VibePartnerProps {
   level: number;
   name: string;
   mood?: number;
+  type?: 'cat' | 'panda';
   onCustomize: () => void;
 }
 
 const LEVEL_THRESHOLDS = [0, 50, 150, 300, 500, 800, 1200, 1700];
 
-const getMascotExpression = (mood?: number, level?: number) => {
-  if (!mood) return "😊";
-  if (mood <= 2) return "🤗"; // Comforting
-  if (mood === 3) return "😌"; // Calm
-  if (mood >= 4) return "✨"; // Celebratory
-  return "😊";
+const MASCOT_TYPES = {
+  cat: {
+    happy: "😺",
+    excited: "😸",
+    loving: "😻",
+    calm: "😽",
+    comforting: "🙀➡️😿",
+    default: "😺"
+  },
+  panda: {
+    happy: "🐼",
+    excited: "🐼✨",
+    loving: "🐼💝",
+    calm: "🐼😌",
+    comforting: "🐼🤗",
+    default: "🐼"
+  }
 };
 
-const getMoodMessage = (mood?: number, name?: string) => {
-  if (!mood) return `Hi! I'm ${name || 'your Vibe Partner'}. Let's take care of ourselves together! 💙`;
+const getMascotExpression = (mood?: number, level?: number, type: 'cat' | 'panda' = 'cat') => {
+  const mascot = MASCOT_TYPES[type];
   
-  if (mood === 1) return "I see you're struggling. That's okay - you're doing your best, and I'm here with you. 🤗";
-  if (mood === 2) return "Some days are harder than others. Let's take it one step at a time, together. 💙";
-  if (mood === 3) return "You're doing okay! Remember, progress isn't always linear. 😌";
-  if (mood === 4) return "You're feeling good today! Let's keep this positive energy going! 🌟";
-  if (mood === 5) return "Wow, you're glowing! I'm so proud of your progress! ✨";
-  
-  return "Every small step counts. You've got this! 💪";
+  if (!mood) return mascot.default;
+  if (mood === 1) return mascot.comforting;
+  if (mood === 2) return mascot.calm;
+  if (mood === 3) return mascot.happy;
+  if (mood === 4) return mascot.loving;
+  if (mood === 5) return mascot.excited;
+  return mascot.default;
 };
 
-export const VibePartner = ({ points, level, name, mood, onCustomize }: VibePartnerProps) => {
+const getMoodMessage = (mood?: number, name?: string, type: 'cat' | 'panda' = 'cat') => {
+  const greetings = {
+    cat: `Meow~ I'm ${name || 'your Vibe Partner'}! Let's take care of ourselves together! 💙`,
+    panda: `*munch munch* Hi! I'm ${name || 'your Vibe Partner'}! Let's grow stronger together! 💙`
+  };
+  
+  const messages = {
+    cat: {
+      1: "*soft purr* I see you're struggling. That's okay - even cats have rough days. I'm here with you. 🤗",
+      2: "*gentle headbump* Some days are harder. Let's take it one paw step at a time, together. 💙",
+      3: "*content purr* You're doing okay! Every little step forward counts. 😌",
+      4: "*happy tail wiggle* You're feeling good today! Your positive energy is purr-fect! 🌟",
+      5: "*excited zoom* Wow, you're absolutely glowing! I'm so proud of your progress! ✨"
+    },
+    panda: {
+      1: "*offers bamboo* I see you're having a tough time. That's okay - even pandas need rest days. I'm here. 🤗",
+      2: "*sits beside you* Some days are harder. Let's take it slow and steady, together. 💙",
+      3: "*munches happily* You're doing great! Progress takes time, just like growing bamboo. 😌",
+      4: "*playful roll* You're feeling wonderful! Let's keep this peaceful energy flowing! 🌟",
+      5: "*celebrates with bamboo dance* Amazing! You're shining so bright today! I'm so proud! ✨"
+    }
+  };
+  
+  if (!mood) return greetings[type];
+  return messages[type][mood as keyof typeof messages.cat] || "Every small step counts. You've got this! 💪";
+};
+
+export const VibePartner = ({ points, level, name, mood, type = 'cat', onCustomize }: VibePartnerProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   
@@ -45,8 +84,8 @@ export const VibePartner = ({ points, level, name, mood, onCustomize }: VibePart
   const pointsNeededForNext = nextThreshold - currentThreshold;
   const progressPercent = (progressInLevel / pointsNeededForNext) * 100;
   
-  const expression = getMascotExpression(mood, level);
-  const message = getMoodMessage(mood, name);
+  const expression = getMascotExpression(mood, level, type);
+  const message = getMoodMessage(mood, name, type);
   
   useEffect(() => {
     // Check if level just increased
@@ -93,23 +132,41 @@ export const VibePartner = ({ points, level, name, mood, onCustomize }: VibePart
         {/* Mascot Display */}
         <div className="flex flex-col items-center py-4">
           <div className="relative">
-            <div className="text-6xl mb-2 animate-bounce-slow">
-              {expression}
+            {/* Cute mascot with floating animation */}
+            <div className="relative">
+              <div className="text-7xl mb-2 animate-bounce-slow filter drop-shadow-lg">
+                {expression}
+              </div>
+              {/* Sparkle effects for higher levels */}
+              {level >= 3 && (
+                <div className="absolute -top-2 -right-2 text-2xl animate-pulse">
+                  ✨
+                </div>
+              )}
+              {level >= 5 && (
+                <div className="absolute -bottom-2 -left-2 text-2xl animate-pulse delay-75">
+                  💫
+                </div>
+              )}
             </div>
             <div className="absolute -top-2 -right-2">
-              <div className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+              <div className="bg-gradient-to-r from-primary to-secondary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
                 <Star className="w-3 h-3" />
                 <span>Lv {level}</span>
               </div>
             </div>
           </div>
           
-          {/* Message bubble */}
-          <div className="relative bg-card border border-primary/20 rounded-2xl p-3 max-w-[250px] shadow-sm">
-            <p className="text-xs text-foreground text-center leading-relaxed">
+          {/* Cute message bubble */}
+          <div className="relative bg-gradient-to-br from-card via-card to-primary/5 border-2 border-primary/20 rounded-2xl p-3 max-w-[250px] shadow-md mt-2">
+            <p className="text-xs text-foreground text-center leading-relaxed font-medium">
               {message}
             </p>
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card" />
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card drop-shadow-sm" />
+            {/* Cute decorations */}
+            <div className="absolute -top-1 -right-1 text-sm">
+              {type === 'cat' ? '🐾' : '🎋'}
+            </div>
           </div>
         </div>
 
@@ -137,17 +194,19 @@ export const VibePartner = ({ points, level, name, mood, onCustomize }: VibePart
 
         {/* Quick stats */}
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-card/50 rounded-lg p-2">
+          <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg p-2 border border-primary/10">
             <div className="text-xl mb-1">🏆</div>
-            <div className="text-xs text-muted-foreground">Level {level}</div>
+            <div className="text-xs text-muted-foreground font-medium">Level {level}</div>
           </div>
-          <div className="bg-card/50 rounded-lg p-2">
+          <div className="bg-gradient-to-br from-secondary/5 to-secondary/10 rounded-lg p-2 border border-secondary/10">
             <div className="text-xl mb-1">⭐</div>
-            <div className="text-xs text-muted-foreground">{points} pts</div>
+            <div className="text-xs text-muted-foreground font-medium">{points} pts</div>
           </div>
-          <div className="bg-card/50 rounded-lg p-2">
-            <div className="text-xl mb-1">{expression}</div>
-            <div className="text-xs text-muted-foreground">Mood</div>
+          <div className="bg-gradient-to-br from-success/5 to-success/10 rounded-lg p-2 border border-success/10">
+            <div className="text-xl mb-1">{type === 'cat' ? '🐱' : '🐼'}</div>
+            <div className="text-xs text-muted-foreground font-medium">
+              {type === 'cat' ? 'Purr-fect' : 'Pawsome'}
+            </div>
           </div>
         </div>
       </Card>
@@ -156,6 +215,7 @@ export const VibePartner = ({ points, level, name, mood, onCustomize }: VibePart
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         currentName={name}
+        currentType={type}
         level={level}
         points={points}
         onCustomize={onCustomize}

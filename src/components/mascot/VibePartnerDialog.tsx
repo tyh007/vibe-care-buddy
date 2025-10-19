@@ -12,11 +12,13 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Trophy, Star, Heart, Sparkles } from "lucide-react";
+import { MascotSelector } from "./MascotSelector";
 
 interface VibePartnerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentName: string;
+  currentType: 'cat' | 'panda';
   level: number;
   points: number;
   onCustomize: () => void;
@@ -44,14 +46,17 @@ export const VibePartnerDialog = ({
   open,
   onOpenChange,
   currentName,
+  currentType,
   level,
   points,
   onCustomize,
 }: VibePartnerDialogProps) => {
   const [newName, setNewName] = useState(currentName);
+  const [selectedType, setSelectedType] = useState<'cat' | 'panda'>(currentType);
   
-  const handleSaveName = () => {
+  const handleSave = () => {
     localStorage.setItem('vibePartnerName', newName);
+    localStorage.setItem('vibePartnerType', selectedType);
     onCustomize();
     onOpenChange(false);
   };
@@ -78,21 +83,30 @@ export const VibePartnerDialog = ({
 
           {/* Customize Tab */}
           <TabsContent value="customize" className="space-y-4">
-            <Card className="p-4 bg-gradient-to-br from-primary/5 to-secondary/5">
-              <div className="text-center space-y-3">
-                <div className="text-6xl">😊</div>
-                <div className="space-y-2">
-                  <Label htmlFor="partner-name">Partner Name</Label>
-                  <Input
-                    id="partner-name"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder="Enter a name..."
-                    maxLength={20}
-                  />
-                </div>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium mb-3 block">Choose Your Partner</Label>
+                <MascotSelector selected={selectedType} onSelect={setSelectedType} />
               </div>
-            </Card>
+
+              <Card className="p-4 bg-gradient-to-br from-primary/5 to-secondary/5">
+                <div className="text-center space-y-3">
+                  <div className="text-6xl">
+                    {selectedType === 'cat' ? '😺' : '🐼'}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="partner-name">Partner Name</Label>
+                    <Input
+                      id="partner-name"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      placeholder={selectedType === 'cat' ? 'e.g., Whiskers' : 'e.g., Bamboo'}
+                      maxLength={20}
+                    />
+                  </div>
+                </div>
+              </Card>
+            </div>
 
             <div className="space-y-3">
               <h4 className="font-medium text-sm">About Your Partner</h4>
@@ -106,7 +120,7 @@ export const VibePartnerDialog = ({
               </Card>
             </div>
 
-            <Button onClick={handleSaveName} className="w-full">
+            <Button onClick={handleSave} className="w-full">
               Save Changes
             </Button>
           </TabsContent>
