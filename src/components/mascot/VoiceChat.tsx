@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Volume2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface VoiceChatProps {
   partnerName: string;
@@ -17,6 +18,7 @@ export const VoiceChat = ({ partnerName, partnerType, mood, onSpeakingChange }: 
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Initialize Web Speech API
@@ -78,6 +80,23 @@ export const VoiceChat = ({ partnerName, partnerType, mood, onSpeakingChange }: 
       if (data?.response) {
         console.log('AI response:', data.response);
         await speak(data.response);
+
+        // Show professional help suggestion if needed
+        if (data.suggestProfessionalHelp) {
+          toast({
+            title: "Professional Support Available",
+            description: "Consider talking to our CBT therapist for deeper support.",
+            action: (
+              <Button 
+                size="sm" 
+                onClick={() => navigate('/cbt-therapist')}
+              >
+                Talk to CBT Therapist
+              </Button>
+            ),
+            duration: 10000,
+          });
+        }
       }
     } catch (error: any) {
       console.error('Error getting AI response:', error);

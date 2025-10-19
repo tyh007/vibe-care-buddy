@@ -25,6 +25,17 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
+    // Detect if professional help might be needed based on keywords
+    const concerningPatterns = [
+      /suicidal|kill myself|want to die|end it all/i,
+      /severe depression|can't go on|hopeless|worthless/i,
+      /panic attack|can't breathe|severe anxiety/i,
+      /self harm|hurt myself|cutting/i,
+      /no point in living/i
+    ];
+
+    const needsHelp = concerningPatterns.some(pattern => pattern.test(message));
+
     // Personalize system prompt based on partner type and mood
     const moodContext = mood ? `The user's current mood is ${mood}/5.` : '';
     const typePersonality = {
@@ -32,6 +43,18 @@ serve(async (req) => {
       dog: 'You are an enthusiastic dog companion. You are loyal, supportive, and always excited to help. Use *wag wag* occasionally.',
       panda: 'You are a wise panda companion. You are calm, thoughtful, and bring peaceful energy. Use *munch munch* occasionally.'
     };
+
+    let additionalGuidance = '';
+    if (needsHelp) {
+      additionalGuidance = `\n\nIMPORTANT: The user may be experiencing serious difficulties. After responding with empathy and validation:
+1. Express genuine concern for their wellbeing
+2. Gently suggest they might benefit from professional CBT therapy
+3. Mention that VibeCare has a built-in CBT therapist they can talk to
+4. Encourage them to also reach out to campus counseling or crisis services if needed
+5. Let them know you're there for them, but professional help can provide deeper support
+
+Be warm and supportive, not alarming. Frame it as additional support, not replacement.`;
+    }
 
     const systemPrompt = `You are ${partnerName}, a ${partnerType} companion helping a college student with their mental wellness.
 ${typePersonality[partnerType as keyof typeof typePersonality]}
@@ -43,7 +66,7 @@ You understand CBT (Cognitive Behavioral Therapy) principles and provide:
 - Gentle reframing of negative thoughts
 - Encouragement for self-care and healthy habits
 
-Keep responses brief (2-3 sentences), conversational, and supportive. Focus on the student's immediate feelings and needs.`;
+Keep responses brief (2-3 sentences), conversational, and supportive. Focus on the student's immediate feelings and needs.${additionalGuidance}`;
 
     console.log('Calling Lovable AI...');
     
@@ -89,7 +112,10 @@ Keep responses brief (2-3 sentences), conversational, and supportive. Focus on t
     console.log('AI response received successfully');
 
     return new Response(
-      JSON.stringify({ response: aiResponse }),
+      JSON.stringify({ 
+        response: aiResponse,
+        suggestProfessionalHelp: needsHelp 
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 

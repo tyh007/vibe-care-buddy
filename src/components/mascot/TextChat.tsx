@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -24,6 +25,7 @@ export const TextChat = ({ partnerName, partnerType, mood }: TextChatProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Scroll to bottom when new messages arrive
@@ -67,6 +69,23 @@ export const TextChat = ({ partnerName, partnerType, mood }: TextChatProps) => {
           timestamp: new Date()
         };
         setMessages(prev => [...prev, assistantMessage]);
+
+        // Show professional help suggestion if needed
+        if (data.suggestProfessionalHelp) {
+          toast({
+            title: "Professional Support Available",
+            description: "Consider talking to our CBT therapist for deeper support.",
+            action: (
+              <Button 
+                size="sm" 
+                onClick={() => navigate('/cbt-therapist')}
+              >
+                Talk to CBT Therapist
+              </Button>
+            ),
+            duration: 10000,
+          });
+        }
       }
     } catch (error: any) {
       console.error('Error getting AI response:', error);

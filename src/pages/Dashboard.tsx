@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Calendar, Heart, LogOut, CalendarDays, LayoutGrid } from "lucide-react";
+import { Calendar, Heart, LogOut, CalendarDays, LayoutGrid, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { MoodTimeline } from "@/components/MoodTimeline";
@@ -364,6 +364,27 @@ const Dashboard = () => {
               </div>
               
               <p className="text-sm text-muted-foreground text-center">How are you feeling right now?</p>
+            </Card>
+
+            {/* CBT Therapist Access */}
+            <Card className="p-6 space-y-4 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20 cursor-pointer hover:shadow-lg transition-all"
+              onClick={() => navigate('/cbt-therapist')}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Brain className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-foreground">CBT Therapist</h3>
+                  <p className="text-sm text-muted-foreground">Professional support available</p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Talk to our AI-powered CBT therapist for evidence-based mental health support
+              </p>
+              <Button variant="outline" size="sm" className="w-full">
+                Start Session
+              </Button>
             </Card>
 
             {/* Smart Suggestion Engine */}
