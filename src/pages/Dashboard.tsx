@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Calendar, Heart, Settings, LogOut, CalendarDays, LayoutGrid } from "lucide-react";
+import { Calendar, Heart, LogOut, CalendarDays, LayoutGrid } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { MoodTimeline } from "@/components/MoodTimeline";
@@ -304,9 +304,6 @@ const Dashboard = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={() => navigate('/settings')}>
-                <Settings className="w-5 h-5" />
-              </Button>
               <Button variant="ghost" size="icon" onClick={handleLogout}>
                 <LogOut className="w-5 h-5" />
               </Button>

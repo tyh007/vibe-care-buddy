@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Sparkles, Star, Heart, Settings, Mic, MicOff, Volume2 } from "lucide-react";
+import { Sparkles, Star, Heart, Settings } from "lucide-react";
 import { VibePartnerDialog } from "./VibePartnerDialog";
-import { useConversation } from "@11labs/react";
+import { VoiceChat } from "./VoiceChat";
 
 interface InteractiveVibePartnerProps {
   points: number;
@@ -47,10 +47,10 @@ const MASCOT_TYPES = {
   }
 };
 
-const getMascotExpression = (mood?: number, type: 'cat' | 'dog' | 'panda' = 'cat', isSpeaking?: boolean) => {
+const getMascotExpression = (mood?: number, type: 'cat' | 'dog' | 'panda' = 'cat', isSpeakingOrListening?: boolean) => {
   const mascot = MASCOT_TYPES[type];
   
-  if (isSpeaking) return mascot.excited;
+  if (isSpeakingOrListening) return mascot.excited;
   if (!mood) return mascot.default;
   if (mood === 1) return mascot.comforting;
   if (mood === 2) return mascot.calm;
@@ -79,22 +79,7 @@ export const InteractiveVibePartner = ({
 }: InteractiveVibePartnerProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
-  
-  const conversation = useConversation({
-    onConnect: () => {
-      console.log("Connected to voice conversation");
-    },
-    onDisconnect: () => {
-      console.log("Disconnected from voice conversation");
-    },
-    onMessage: (message) => {
-      console.log("Message:", message);
-    },
-    onError: (error) => {
-      console.error("Conversation error:", error);
-    }
-  });
+  const [isSpeakingOrListening, setIsSpeakingOrListening] = useState(false);
   
   const currentThreshold = LEVEL_THRESHOLDS[level] || 0;
   const nextThreshold = LEVEL_THRESHOLDS[level + 1] || LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
@@ -102,67 +87,8 @@ export const InteractiveVibePartner = ({
   const pointsNeededForNext = nextThreshold - currentThreshold;
   const progressPercent = (progressInLevel / pointsNeededForNext) * 100;
   
-  const expression = getMascotExpression(mood, type, conversation.isSpeaking);
+  const expression = getMascotExpression(mood, type, isSpeakingOrListening);
   const greeting = getGreeting(type, name);
-  const isConnected = conversation.status === "connected";
-
-  const handleStartConversation = async () => {
-    try {
-      setIsConnecting(true);
-      
-      // Get API key from localStorage
-      const apiKey = localStorage.getItem('elevenlabs_api_key');
-      if (!apiKey) {
-        alert('Please add your ElevenLabs API key first! Go to Settings to add it.');
-        setIsConnecting(false);
-        return;
-      }
-
-      // Request microphone permission
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-
-      // TODO: Replace with your ElevenLabs agent ID
-      const agentId = "your-agent-id-here";
-      
-      // Generate signed URL (in production, this should be done server-side)
-      const response = await fetch(
-        `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${agentId}`,
-        {
-          method: "GET",
-          headers: {
-            "xi-api-key": apiKey,
-          }
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to get conversation URL');
-      }
-
-      const data = await response.json();
-      await conversation.startSession({ 
-        signedUrl: data.signed_url,
-        overrides: {
-          agent: {
-            prompt: {
-              prompt: `You are ${name}, a caring ${type} companion helping a college student with their mental wellness. You understand CBT principles and provide warm, supportive guidance. Keep responses brief and conversational.`
-            },
-            firstMessage: greeting,
-          }
-        }
-      });
-      
-      setIsConnecting(false);
-    } catch (error) {
-      console.error('Failed to start conversation:', error);
-      alert('Failed to start conversation. Please check your API key and try again.');
-      setIsConnecting(false);
-    }
-  };
-
-  const handleEndConversation = async () => {
-    await conversation.endSession();
-  };
 
   return (
     <>
@@ -196,19 +122,19 @@ export const InteractiveVibePartner = ({
             </Button>
           </div>
 
-          {/* Large mascot display */}
+            {/* Large mascot display */}
           <div className="flex flex-col items-center py-8">
             <div className="relative mb-6">
               {/* Main mascot with animations */}
               <div className="relative">
                 <div className={`text-9xl transition-all duration-300 ${
-                  conversation.isSpeaking ? 'animate-pulse scale-110' : 'animate-bounce-slow'
+                  isSpeakingOrListening ? 'animate-pulse scale-110' : 'animate-bounce-slow'
                 }`}>
                   {expression}
                 </div>
                 
-                {/* Speaking indicator */}
-                {conversation.isSpeaking && (
+                {/* Speaking/Listening indicator */}
+                {isSpeakingOrListening && (
                   <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-1">
                     <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                     <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -244,38 +170,12 @@ export const InteractiveVibePartner = ({
           </div>
 
           {/* Voice controls */}
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-center gap-4">
-              {!isConnected ? (
-                <Button
-                  size="lg"
-                  onClick={handleStartConversation}
-                  disabled={isConnecting}
-                  className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all"
-                >
-                  <Mic className="w-6 h-6 mr-3" />
-                  {isConnecting ? 'Connecting...' : 'Start Talking'}
-                </Button>
-              ) : (
-                <Button
-                  size="lg"
-                  variant="destructive"
-                  onClick={handleEndConversation}
-                  className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all"
-                >
-                  <MicOff className="w-6 h-6 mr-3" />
-                  End Conversation
-                </Button>
-              )}
-            </div>
-            
-            {isConnected && (
-              <div className="text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
-                <Volume2 className="w-4 h-4 text-primary animate-pulse" />
-                <span>Listening... speak naturally!</span>
-              </div>
-            )}
-          </div>
+          <VoiceChat
+            partnerName={name}
+            partnerType={type}
+            mood={mood}
+            onSpeakingChange={setIsSpeakingOrListening}
+          />
 
           {/* Energy Progress */}
           <div className="space-y-3">
