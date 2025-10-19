@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface RewardState {
   points: number;
@@ -23,25 +24,59 @@ const REWARD_POINTS = {
 
 export const useRewardSystem = () => {
   const { toast } = useToast();
-  const [rewardState, setRewardState] = useState<RewardState>(() => {
-    const saved = localStorage.getItem('vibeRewardState');
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    return {
-      points: 0,
-      level: 0,
-      streak: 0,
-      lastCheckIn: null,
-      totalCheckIns: 0,
-      completedActivities: 0,
-    };
+  const [rewardState, setRewardState] = useState<RewardState>({
+    points: 0,
+    level: 0,
+    streak: 0,
+    lastCheckIn: null,
+    totalCheckIns: 0,
+    completedActivities: 0,
   });
 
-  // Save to localStorage whenever state changes
+  // Load from database on mount
   useEffect(() => {
-    localStorage.setItem('vibeRewardState', JSON.stringify(rewardState));
-  }, [rewardState]);
+    loadRewardState();
+  }, []);
+
+  const loadRewardState = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("coins, current_streak, total_check_ins, last_check_in, longest_streak")
+      .eq("user_id", user.id)
+      .single();
+
+    if (profile) {
+      const points = profile.coins || 0;
+      setRewardState({
+        points,
+        level: calculateLevel(points),
+        streak: profile.current_streak || 0,
+        lastCheckIn: profile.last_check_in,
+        totalCheckIns: profile.total_check_ins || 0,
+        completedActivities: 0, // This can be tracked separately if needed
+      });
+    }
+  };
+
+  // Sync points to database
+  const syncToDatabase = async (newPoints: number, updates: Partial<RewardState> = {}) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const dbUpdates: any = { coins: newPoints };
+    
+    if (updates.streak !== undefined) dbUpdates.current_streak = updates.streak;
+    if (updates.totalCheckIns !== undefined) dbUpdates.total_check_ins = updates.totalCheckIns;
+    if (updates.lastCheckIn !== undefined) dbUpdates.last_check_in = updates.lastCheckIn;
+
+    await supabase
+      .from("profiles")
+      .update(dbUpdates)
+      .eq("user_id", user.id);
+  };
 
   // Calculate level based on points
   const calculateLevel = useCallback((points: number) => {
@@ -62,6 +97,9 @@ export const useRewardSystem = () => {
       const newPoints = prev.points + amount;
       const newLevel = calculateLevel(newPoints);
       const leveledUp = newLevel > prev.level;
+
+      // Sync to database
+      syncToDatabase(newPoints);
 
       // Show toast notification
       setTimeout(() => {
@@ -112,6 +150,13 @@ export const useRewardSystem = () => {
       const newLevel = calculateLevel(newPoints);
       const leveledUp = newLevel > prev.level;
 
+      // Sync to database
+      syncToDatabase(newPoints, { 
+        streak: newStreak, 
+        totalCheckIns: newTotalCheckIns,
+        lastCheckIn: today 
+      });
+
       // Show toast
       setTimeout(() => {
         toast({
@@ -145,6 +190,9 @@ export const useRewardSystem = () => {
       const newPoints = prev.points + REWARD_POINTS.completeActivity;
       const newLevel = calculateLevel(newPoints);
       const leveledUp = newLevel > prev.level;
+
+      // Sync to database
+      syncToDatabase(newPoints);
 
       setTimeout(() => {
         toast({
