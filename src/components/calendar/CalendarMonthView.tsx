@@ -9,6 +9,7 @@ interface CalendarEvent {
   title: string;
   start: string;
   end: string;
+  date: string;
   category: string;
   notes?: string;
   color?: string;
@@ -58,12 +59,7 @@ export const CalendarMonthView = ({
   
   const getEventsForDay = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
-    return events.filter(event => {
-      const eventDate = event.start.includes('T')
-        ? format(parseISO(event.start), 'yyyy-MM-dd')
-        : dateStr;
-      return eventDate === dateStr;
-    });
+    return events.filter(event => event.date === dateStr);
   };
   
   const getMoodForDay = (date: Date) => {

@@ -25,6 +25,7 @@ interface CalendarEvent {
   title: string;
   start: string;
   end: string;
+  date: string; // YYYY-MM-DD format
   category: string;
   notes?: string;
   color?: string;
@@ -64,6 +65,7 @@ const Dashboard = () => {
       title: 'Introduction to Psychology',
       start: '09:00',
       end: '10:00',
+      date: format(new Date(), 'yyyy-MM-dd'),
       category: 'class',
       notes: 'Review chapters 3-4',
       color: '#8b5cf6'
@@ -73,6 +75,7 @@ const Dashboard = () => {
       title: 'Study Group - Statistics',
       start: '11:00',
       end: '13:00',
+      date: format(new Date(), 'yyyy-MM-dd'),
       category: 'study',
       notes: 'Bring practice problems',
       color: '#ec4899'
@@ -82,6 +85,7 @@ const Dashboard = () => {
       title: 'Computer Science Lab',
       start: '15:30',
       end: '17:00',
+      date: format(new Date(), 'yyyy-MM-dd'),
       category: 'class',
       color: '#8b5cf6'
     },
@@ -90,6 +94,7 @@ const Dashboard = () => {
       title: 'Yoga Class',
       start: '18:00',
       end: '19:00',
+      date: format(new Date(), 'yyyy-MM-dd'),
       category: 'wellness',
       notes: 'Bring yoga mat',
       color: '#10b981'
@@ -131,17 +136,24 @@ const Dashboard = () => {
   };
 
   const handleEventCreate = (newEvent: Omit<CalendarEvent, 'id'> & { date?: Date }) => {
+    const eventDate = newEvent.date || new Date();
+    
     const event: CalendarEvent = {
       title: newEvent.title,
       start: newEvent.start,
       end: newEvent.end,
+      date: format(eventDate, 'yyyy-MM-dd'),
       category: newEvent.category,
       notes: newEvent.notes,
       color: newEvent.color,
       id: Date.now().toString(),
     };
     
-    setEvents([...events, event].sort((a, b) => a.start.localeCompare(b.start)));
+    setEvents([...events, event].sort((a, b) => {
+      // Sort by date first, then by time
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return a.start.localeCompare(b.start);
+    }));
     
     // Award points for event creation
     rewardSystem.rewardEventCreation();
@@ -168,8 +180,11 @@ const Dashboard = () => {
   };
 
   const handleAcceptSuggestion = (suggestion: any) => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    
     // Find the next available free slot
-    const sortedEvents = [...events].sort((a, b) => a.start.localeCompare(b.start));
+    const todayEvents = events.filter(e => e.date === today);
+    const sortedEvents = todayEvents.sort((a, b) => a.start.localeCompare(b.start));
     let suggestedStart = "14:00"; // Default afternoon slot
     
     // Try to find a gap after study sessions
@@ -200,11 +215,15 @@ const Dashboard = () => {
       title: suggestion.title,
       start: suggestedStart,
       end: suggestedEnd,
+      date: today,
       category: 'wellness',
       notes: suggestion.description,
     };
     
-    setEvents([...events, newEvent].sort((a, b) => a.start.localeCompare(b.start)));
+    setEvents([...events, newEvent].sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return a.start.localeCompare(b.start);
+    }));
     
     // Award points for completing activity
     rewardSystem.rewardActivityCompletion();

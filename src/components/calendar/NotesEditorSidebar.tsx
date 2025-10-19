@@ -20,8 +20,10 @@ interface CalendarEvent {
   title: string;
   start: string;
   end: string;
+  date: string;
   category: string;
   notes?: string;
+  color?: string;
 }
 
 interface NotesEditorSidebarProps {
