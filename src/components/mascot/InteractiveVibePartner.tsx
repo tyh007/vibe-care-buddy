@@ -141,7 +141,7 @@ export const InteractiveVibePartner = ({
 
       const data = await response.json();
       await conversation.startSession({ 
-        url: data.signed_url,
+        signedUrl: data.signed_url,
         overrides: {
           agent: {
             prompt: {
