@@ -323,6 +323,30 @@ const Dashboard = () => {
               <Button
                 variant="ghost"
                 size="sm"
+                onClick={() => {
+                  navigate('/shop');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full justify-start gap-2"
+              >
+                <Tag className="w-4 h-4" />
+                Avatar Shop
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  navigate('/mood-dashboard');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full justify-start gap-2"
+              >
+                <LayoutGrid className="w-4 h-4" />
+                Mood Analytics
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleLogout}
                 className="w-full justify-start gap-2"
               >
@@ -409,6 +433,24 @@ const Dashboard = () => {
                         >
                           <Users className="w-4 h-4" />
                           Community Room
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate('/shop')}
+                          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+                        >
+                          <Tag className="w-4 h-4" />
+                          Avatar Shop
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate('/mood-dashboard')}
+                          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+                        >
+                          <LayoutGrid className="w-4 h-4" />
+                          Mood Analytics
                         </Button>
                       </div>
                     </div>
