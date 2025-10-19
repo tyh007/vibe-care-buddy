@@ -97,10 +97,10 @@ export const PixelAvatar = ({ size = "medium", showCoins = true }: PixelAvatarPr
     shade: "#F4A69A", 
     light: "#FFD4CC", 
     dark: "#E89B8D",
-    mid: "#FCAD9E" // intermediate shade for smoother transitions
+    mid: "#FCAD9E"
   };
 
-  // Base avatar grid - 64x96 with high detail
+  // Base avatar grid - 64x96 with natural, human-like design
   const createBaseGrid = () => {
     const grid: number[] = [];
     
@@ -108,125 +108,121 @@ export const PixelAvatar = ({ size = "medium", showCoins = true }: PixelAvatarPr
       for (let x = 0; x < gridWidth; x++) {
         let value = 0;
         
-        // === HAIRSTYLE RENDERING (smoother, no vertical lines) ===
+        // === HAIRSTYLE RENDERING (natural, no protruding elements) ===
         if (hairstyle === 'long') {
-          // Main hair volume
-          if (y >= 6 && y <= 22 && x >= 16 && x <= 47) {
-            if (y <= 10) value = 1;
-            else if (y <= 16) value = 2;
+          // Main hair volume - starts lower for natural look
+          if (y >= 8 && y <= 22 && x >= 18 && x <= 45) {
+            const distFromTop = y - 8;
+            if (distFromTop <= 4) value = 1;
+            else if (distFromTop <= 10) value = 2;
             else value = 3;
           }
-          // Hair strands extending down
-          if (y >= 18 && y <= 40) {
-            if (x >= 16 && x <= 20) value = 3; // left strand
-            if (x >= 43 && x <= 47) value = 3; // right strand
+          // Hair strands extending down naturally
+          if (y >= 20 && y <= 38) {
+            if (x >= 18 && x <= 22) value = 3;
+            if (x >= 41 && x <= 45) value = 3;
           }
-          // Soft bangs without stripes
-          if (y >= 12 && y <= 16 && x >= 20 && x <= 44) {
-            const bangsDist = Math.abs(x - 32) / 12;
-            if (bangsDist < 0.5) value = 3;
-            else if (bangsDist < 0.8) value = 2;
+          // Natural bangs
+          if (y >= 14 && y <= 18 && x >= 22 && x <= 41) {
+            const bangsDist = Math.abs(x - 31.5) / 10;
+            if (bangsDist < 0.6) value = 3;
+            else if (bangsDist < 0.9) value = 2;
           }
         } else if (hairstyle === 'bob') {
-          if (y >= 8 && y <= 30 && x >= 18 && x <= 45) {
-            if (y <= 12) value = 1;
-            else if (y <= 20) value = 2;
+          if (y >= 10 && y <= 30 && x >= 18 && x <= 45) {
+            if (y <= 14) value = 1;
+            else if (y <= 22) value = 2;
             else value = 3;
           }
-          // Bob curve detail
           if (y >= 24 && y <= 30) {
             if (x >= 18 && x <= 22 || x >= 41 && x <= 45) value = 3;
           }
         } else if (hairstyle === 'ponytail') {
           // Main hair
-          if (y >= 8 && y <= 22 && x >= 20 && x <= 43) {
-            if (y <= 12) value = 1;
+          if (y >= 10 && y <= 22 && x >= 20 && x <= 43) {
+            if (y <= 14) value = 1;
             else if (y <= 18) value = 2;
             else value = 3;
           }
-          // Ponytail at back
-          if (y >= 16 && y <= 36 && x >= 46 && x <= 52) {
+          // Ponytail at back (natural position)
+          if (y >= 18 && y <= 36 && x >= 46 && x <= 52) {
             value = 3;
             if (x === 46 || x === 52) value = 2;
           }
         } else if (hairstyle === 'pigtails') {
-          // Center hair
-          if (y >= 8 && y <= 20 && x >= 22 && x <= 41) {
-            if (y <= 12) value = 1;
+          // Center hair - natural top
+          if (y >= 10 && y <= 20 && x >= 22 && x <= 41) {
+            if (y <= 14) value = 1;
             else value = 2;
           }
-          // Left pigtail with detail
-          if (y >= 20 && y <= 32 && x >= 12 && x <= 18) {
+          // Left pigtail - thicker, more natural
+          if (y >= 18 && y <= 30 && x >= 14 && x <= 20) {
             value = 3;
-            if (x === 12 || x === 18) value = 2;
+            if (x === 14 || x === 20) value = 2;
           }
-          // Right pigtail
-          if (y >= 20 && y <= 32 && x >= 45 && x <= 51) {
+          // Right pigtail - thicker, more natural
+          if (y >= 18 && y <= 30 && x >= 43 && x <= 49) {
             value = 3;
-            if (x === 45 || x === 51) value = 2;
+            if (x === 43 || x === 49) value = 2;
           }
         } else if (hairstyle === 'bun') {
-          // Main hair
+          // Main hair - natural coverage
           if (y >= 10 && y <= 20 && x >= 20 && x <= 43) value = 2;
-          // Bun on top with detail
-          if (y >= 4 && y <= 12 && x >= 26 && x <= 37) {
-            if (y <= 8) value = 1;
-            else value = 2;
-          }
-          // Bun highlights (smooth)
-          const bunCenterX = 31.5;
-          const bunCenterY = 7;
-          if (y >= 6 && y <= 8 && x >= 28 && x <= 35) {
+          // Bun positioned naturally on back of head (not on top)
+          if (y >= 8 && y <= 16 && x >= 28 && x <= 35) {
+            const bunCenterX = 31.5;
+            const bunCenterY = 12;
             const bunDist = Math.sqrt(Math.pow(x - bunCenterX, 2) + Math.pow(y - bunCenterY, 2));
-            if (bunDist <= 2) value = 3;
+            if (bunDist <= 4) {
+              if (bunDist <= 2.5) value = 1;
+              else value = 2;
+            }
           }
         } else if (hairstyle === 'pixie') {
-          // Short pixie cut with natural texture
-          if (y >= 8 && y <= 18 && x >= 18 && x <= 45) {
-            if (y <= 12) value = 1;
+          // Short pixie cut
+          if (y >= 10 && y <= 18 && x >= 18 && x <= 45) {
+            if (y <= 14) value = 1;
             else value = 2;
           }
-          // Soft texture without vertical lines
-          if (y >= 10 && y <= 16) {
+          if (y >= 12 && y <= 16) {
             const textureFactor = (x + y * 2) % 7;
             if (textureFactor < 3 && value === 2) value = 3;
           }
         }
         
-        // === FACE (smoother, rounder shape) ===
-        // Use distance calculation for rounder face
+        // === FACE (natural, smooth, rounded) ===
         const faceCenterX = 31.5;
         const faceCenterY = 28;
-        const faceRadiusX = 10;
-        const faceRadiusY = 10;
+        const faceRadiusX = 11;
+        const faceRadiusY = 12;
         const distanceFromFaceCenter = Math.sqrt(
           Math.pow((x - faceCenterX) / faceRadiusX, 2) + 
           Math.pow((y - faceCenterY) / faceRadiusY, 2)
         );
         
-        if (y >= 18 && y <= 38 && x >= 22 && x <= 41 && distanceFromFaceCenter <= 1) {
+        // Natural face shape with smooth transitions
+        if (y >= 16 && y <= 40 && x >= 20 && x <= 43 && distanceFromFaceCenter <= 1.1) {
           value = 4;
-          // Smooth edge shading
-          if (distanceFromFaceCenter > 0.85) value = 5;
-          else if (distanceFromFaceCenter > 0.7) value = 13; // use new mid-tone
+          if (distanceFromFaceCenter > 0.95) value = 5;
+          else if (distanceFromFaceCenter > 0.75) value = 13;
         }
         
-        // Forehead highlight (rounded)
+        // Forehead highlight
         if (y >= 20 && y <= 24 && x >= 28 && x <= 35) {
           const highlightDist = Math.abs(x - 31.5) / 4 + Math.abs(y - 22) / 3;
           if (highlightDist < 1 && value === 4) value = 6;
         }
         
-        // === EYES (smoother, rounder) ===
+        // === EYES (smooth, rounder) ===
         if (y >= 26 && y <= 30) {
-          // Left eye - rounder shape
+          // Left eye
           const leftEyeCenterX = 27.5;
           const leftEyeCenterY = 28;
           const leftEyeDist = Math.sqrt(Math.pow(x - leftEyeCenterX, 2) + Math.pow(y - leftEyeCenterY, 2));
           
           if (leftEyeDist <= 2.5) {
-            if (leftEyeDist <= 1.8) value = 7; // eye color
-            else value = 5; // eye outline
+            if (leftEyeDist <= 1.8) value = 7;
+            else value = 5;
           }
           
           // Right eye
@@ -240,59 +236,52 @@ export const PixelAvatar = ({ size = "medium", showCoins = true }: PixelAvatarPr
           }
         }
         
-        // Eye highlights (natural placement)
+        // Eye highlights
         if ((y === 27 && x === 28) || (y === 27 && x === 36)) value = 6;
         
-        // === NOSE (subtle) ===
+        // === NOSE ===
         if (y >= 30 && y <= 31 && x >= 31 && x <= 32) value = 5;
         
         // === BLUSH ===
         if (y >= 30 && y <= 31 && (x >= 24 && x <= 25 || x >= 38 && x <= 39)) value = 8;
         
-        // === MOUTH (small smile) ===
+        // === MOUTH ===
         if (y === 33 && x >= 30 && x <= 33) value = 5;
         
-        // === NECK ===
-        if (y >= 40 && y <= 44 && x >= 28 && x <= 35) value = 4;
-        if (x === 28 || x === 35) value = 5;
+        // === NECK (natural connection to body) ===
+        if (y >= 38 && y <= 45 && x >= 27 && x <= 36) {
+          value = 4;
+          if (x === 27 || x === 36) value = 13;
+        }
         
-        // === TOPS (detailed with shading) ===
+        // === TOPS ===
         const topStartY = 46;
         const topEndY = 66;
         
         if (top === 'basic_shirt' && y >= topStartY && y <= topEndY && x >= 18 && x <= 45) {
           value = 9;
-          // Collar
           if (y >= topStartY && y <= topStartY + 2 && x >= 26 && x <= 37) value = 10;
-          // Edges and shading
           if (x === 18 || x === 45 || y === topEndY) value = 10;
         } else if (top === 'striped_tee' && y >= topStartY && y <= topEndY && x >= 18 && x <= 45) {
-          // Horizontal stripes
           if ((y - topStartY) % 4 < 2) value = 9; else value = 10;
-          // Collar
           if (y >= topStartY && y <= topStartY + 1) value = 10;
         } else if (top === 'hoodie') {
           if (y >= topStartY && y <= topEndY && x >= 18 && x <= 45) {
             value = 9;
-            // Hood detail
             if (y >= topStartY && y <= topStartY + 6 && x >= 24 && x <= 39) {
               if (y === topStartY || y === topStartY + 6) value = 10;
             }
-            // Drawstrings
             if (y >= topStartY + 2 && y <= topStartY + 4 && (x === 30 || x === 33)) value = 10;
           }
         } else if (top === 'tank' && y >= topStartY && y <= topEndY && x >= 24 && x <= 39) {
           value = 9;
-          // Tank straps (thinner)
           if (y >= topStartY && y <= topStartY + 8) {
             if (x >= 26 && x <= 27 || x >= 36 && x <= 37) value = 10;
           }
         } else if (top === 'sweater') {
           if (y >= topStartY && y <= topEndY + 2 && x >= 16 && x <= 47) {
             value = 9;
-            // Sweater texture
             if ((x + y) % 6 < 3) value = 10;
-            // Ribbed bottom
             if (y >= topEndY - 2 && (x - 16) % 2 === 0) value = 10;
           }
         } else if (top === 'crop' && y >= topStartY && y <= topStartY + 12 && x >= 20 && x <= 43) {
@@ -301,108 +290,88 @@ export const PixelAvatar = ({ size = "medium", showCoins = true }: PixelAvatarPr
         } else if (top === 'overalls') {
           if (y >= topStartY && y <= topEndY && x >= 18 && x <= 45) {
             value = 9;
-            // Overall straps with buttons
             if (y >= topStartY && y <= topStartY + 14) {
-              if (x >= 25 && x <= 27) value = 10; // left strap
-              if (x >= 36 && x <= 38) value = 10; // right strap
+              if (x >= 25 && x <= 27) value = 10;
+              if (x >= 36 && x <= 38) value = 10;
             }
-            // Buttons on straps
             if ((y === topStartY + 2 || y === topStartY + 10) && (x === 26 || x === 37)) value = 6;
           }
         } else if (top === 'blazer' && y >= topStartY && y <= topEndY + 2 && x >= 18 && x <= 45) {
           value = 9;
-          // Lapels (detailed)
           if (y >= topStartY + 4 && y <= topStartY + 14) {
-            if (x >= 22 && x <= 24) value = 10; // left lapel
-            if (x >= 39 && x <= 41) value = 10; // right lapel
+            if (x >= 22 && x <= 24) value = 10;
+            if (x >= 39 && x <= 41) value = 10;
           }
-          // Buttons down middle
           if (x >= 31 && x <= 32 && (y - topStartY) % 6 === 0) value = 6;
         }
         
-        // === ARMS (with shading) ===
+        // === ARMS ===
         if (top !== 'tank' && y >= 50 && y <= 64) {
-          // Left arm
           if (x >= 12 && x <= 16) {
             value = 9;
             if (x === 12) value = 10;
           }
-          // Right arm
           if (x >= 47 && x <= 51) {
             value = 9;
             if (x === 51) value = 10;
           }
         } else if (top === 'tank' && y >= 50 && y <= 64) {
-          // Bare arms for tank
           if (x >= 12 && x <= 16) value = 4;
           if (x >= 47 && x <= 51) value = 4;
         }
         
-        // === BOTTOMS (detailed) ===
+        // === BOTTOMS ===
         const bottomStartY = 68;
         
         if (bottom === 'basic_pants') {
           if (y >= bottomStartY && y <= 88) {
-            // Left leg
             if (x >= 22 && x <= 28) {
               value = 11;
               if (x === 22 || x === 28) value = 12;
             }
-            // Right leg
             if (x >= 35 && x <= 41) {
               value = 11;
               if (x === 35 || x === 41) value = 12;
             }
           }
-          // Waistband
           if (y === bottomStartY && x >= 18 && x <= 45) value = 12;
         } else if (bottom === 'jeans') {
           if (y >= bottomStartY && y <= 88) {
-            // Left leg with stitching detail
             if (x >= 22 && x <= 28) {
               value = 11;
-              if (x === 24 || x === 22 || x === 28) value = 12; // side seams and center stitch
+              if (x === 24 || x === 22 || x === 28) value = 12;
             }
-            // Right leg with stitching
             if (x >= 35 && x <= 41) {
               value = 11;
               if (x === 37 || x === 35 || x === 41) value = 12;
             }
-            // Pocket detail
             if (y >= bottomStartY + 4 && y <= bottomStartY + 10) {
               if (x === 23 || x === 27 || x === 36 || x === 40) value = 12;
             }
           }
           if (y === bottomStartY && x >= 18 && x <= 45) value = 12;
         } else if (bottom === 'skirt') {
-          // Skirt with pleats
           if (y >= bottomStartY && y <= bottomStartY + 16 && x >= 20 && x <= 43) {
             value = 11;
-            // Pleats effect
             if ((x - 20) % 4 === 0) value = 12;
-            // Bottom hem
             if (y === bottomStartY + 16) value = 12;
           }
-          // Legs below skirt (more detailed)
           if (y >= bottomStartY + 18 && y <= 88) {
             if (x >= 22 && x <= 28) value = 4;
             if (x >= 35 && x <= 41) value = 4;
           }
         } else if (bottom === 'shorts') {
           if (y >= bottomStartY && y <= bottomStartY + 12) {
-            // Left leg of shorts
             if (x >= 22 && x <= 28) {
               value = 11;
               if (x === 22 || x === 28 || y === bottomStartY + 12) value = 12;
             }
-            // Right leg
             if (x >= 35 && x <= 41) {
               value = 11;
               if (x === 35 || x === 41 || y === bottomStartY + 12) value = 12;
             }
           }
           if (y === bottomStartY && x >= 18 && x <= 45) value = 12;
-          // Legs below shorts
           if (y >= bottomStartY + 14 && y <= 88) {
             if (x >= 22 && x <= 28) value = 4;
             if (x >= 35 && x <= 41) value = 4;
@@ -414,184 +383,138 @@ export const PixelAvatar = ({ size = "medium", showCoins = true }: PixelAvatarPr
           }
           if (y === bottomStartY && x >= 18 && x <= 45) value = 12;
         } else if (bottom === 'dress') {
-          // Flowing dress with detail
           if (y >= bottomStartY && y <= bottomStartY + 20) {
-            // A-line shape
             const width = 23 + Math.floor((y - bottomStartY) * 0.3);
             const centerX = 31;
             if (x >= centerX - width/2 && x <= centerX + width/2) {
               value = 11;
               if (y === bottomStartY + 20) value = 12;
-              // Waist definition
               if (y === bottomStartY && x >= 22 && x <= 41) value = 12;
             }
           }
-          // Legs below dress
           if (y >= bottomStartY + 22 && y <= 88) {
             if (x >= 22 && x <= 28) value = 4;
             if (x >= 35 && x <= 41) value = 4;
           }
         }
         
-        // === FEET (shoes with detail) ===
+        // === FEET ===
         if (y >= 90 && y <= 94) {
-          // Left shoe
           if (x >= 20 && x <= 29) {
             value = 5;
             if (y === 90 || x === 20) value = 12;
           }
-          // Right shoe
           if (x >= 34 && x <= 43) {
             value = 5;
             if (y === 90 || x === 43) value = 12;
           }
         }
         
-        // === ACCESSORIES (more detailed) ===
+        // === ACCESSORIES (natural, integrated designs - no protruding sticks) ===
         if (accessory === 'bow') {
-          // Detailed bow on side of head
-          if (y >= 6 && y <= 12 && x >= 36 && x <= 46) {
+          if (y >= 8 && y <= 14 && x >= 36 && x <= 46) {
             value = 20;
-            // Bow center
-            if (x >= 40 && x <= 42 && y >= 8 && y <= 10) value = 10;
+            if (x >= 40 && x <= 42 && y >= 10 && y <= 12) value = 10;
           }
         } else if (accessory === 'cat') {
-          // Cat ears on top
-          if ((y >= 2 && y <= 8 && x >= 24 && x <= 28) || (y >= 2 && y <= 8 && x >= 35 && x <= 39)) {
+          // Cat ear headband - sits naturally on head, no tall protruding ears
+          if (y >= 10 && y <= 14 && x >= 20 && x <= 43) {
             value = 20;
-            // Ear highlights
-            if (y >= 4 && y <= 6 && ((x >= 25 && x <= 26) || (x >= 36 && x <= 37))) value = 3;
+          }
+          // Small rounded cat ear shapes on headband
+          if (y >= 8 && y <= 12 && ((x >= 24 && x <= 27) || (x >= 36 && x <= 39))) {
+            value = 20;
           }
         } else if (accessory === 'bunny') {
-          // Long bunny ears
-          if ((y >= 2 && y <= 12 && x >= 24 && x <= 26) || (y >= 2 && y <= 12 && x >= 37 && x <= 39)) {
+          // Bunny ear headband - short ears integrated into headband, not tall sticks
+          if (y >= 10 && y <= 14 && x >= 20 && x <= 43) {
             value = 20;
-            // Ear tips (pink inside)
-            if (y >= 4 && y <= 8 && (x === 25 || x === 38)) value = 8;
+          }
+          // Short bunny ears on headband
+          if (y >= 8 && y <= 14 && ((x >= 25 && x <= 26) || (x >= 37 && x <= 38))) {
+            value = 20;
           }
         } else if (accessory === 'flower') {
-          // Flower crown detail
           if (y >= 10 && y <= 16 && x >= 18 && x <= 22) {
             value = 20;
-            // Flower center
             if (y >= 12 && y <= 14 && x >= 19 && x <= 21) value = 9;
           }
         } else if (accessory === 'star') {
-          // Star accessory
-          if (y >= 4 && y <= 10 && x >= 44 && x <= 50) {
-            // Star shape
-            if ((Math.abs(x - 47) + Math.abs(y - 7)) <= 3) value = 20;
+          if (y >= 6 && y <= 12 && x >= 44 && x <= 50) {
+            if ((Math.abs(x - 47) + Math.abs(y - 9)) <= 3) value = 20;
           }
         } else if (accessory === 'wings') {
-          // Fairy wings on back
           if (y >= 50 && y <= 70) {
-            // Left wing
             if (x >= 6 && x <= 10) {
               value = 20;
-              // Wing detail/transparency effect
               if ((x + y) % 3 === 0) value = 0;
             }
-            // Right wing
             if (x >= 53 && x <= 57) {
               value = 20;
               if ((x + y) % 3 === 0) value = 0;
             }
           }
         } else if (accessory === 'halo') {
-          // Halo above head
-          if (y >= 2 && y <= 6 && x >= 26 && x <= 37) {
-            if (y === 2 || y === 6 || x === 26 || x === 37) value = 20;
+          if (y >= 4 && y <= 8 && x >= 26 && x <= 37) {
+            if (y === 4 || y === 8 || x === 26 || x === 37) value = 20;
           }
         } else if (accessory === 'horns') {
-          // Devil horns
-          if (y >= 4 && y <= 10) {
-            // Left horn
-            if (x >= 18 && x <= 20) {
-              value = 20;
-              if (y >= 4 && y <= 6) value = 12;
-            }
-            // Right horn
-            if (x >= 43 && x <= 45) {
-              value = 20;
-              if (y >= 4 && y <= 6) value = 12;
-            }
+          // Small horns integrated into hair - not tall protruding sticks
+          if (y >= 8 && y <= 12) {
+            if (x >= 20 && x <= 22) value = 20;
+            if (x >= 41 && x <= 43) value = 20;
           }
         } else if (accessory === 'headphones') {
-          // Over-ear headphones with detail
           if (y >= 20 && y <= 28) {
-            // Left ear cup
             if (x >= 14 && x <= 18) {
               value = 20;
-              // Padding detail
               if (x >= 15 && x <= 17 && y >= 22 && y <= 26) value = 5;
             }
-            // Right ear cup
             if (x >= 45 && x <= 49) {
               value = 20;
               if (x >= 46 && x <= 48 && y >= 22 && y <= 26) value = 5;
             }
           }
-          // Headband
-          if (y >= 8 && y <= 10 && x >= 20 && x <= 43) value = 20;
+          if (y >= 10 && y <= 12 && x >= 20 && x <= 43) value = 20;
         } else if (accessory === 'glasses') {
-          // Detailed glasses frames
           if (y >= 26 && y <= 30) {
-            // Left lens frame
             if ((y === 26 || y === 30 || x === 24 || x === 29) && x >= 24 && x <= 29) {
               value = 20;
             }
-            // Right lens frame  
             if ((y === 26 || y === 30 || x === 34 || x === 39) && x >= 34 && x <= 39) {
               value = 20;
             }
           }
-          // Bridge
           if (y === 28 && x >= 30 && x <= 33) value = 20;
-          // Temples (arms)
           if (y === 28 && (x >= 21 && x <= 23 || x >= 40 && x <= 42)) value = 20;
         } else if (accessory === 'sunglasses') {
-          // Cool sunglasses
           if (y >= 25 && y <= 30 && x >= 23 && x <= 40) {
-            // Left lens (solid dark)
             if (x >= 24 && x <= 29) value = 20;
-            // Right lens
             if (x >= 34 && x <= 39) value = 20;
-            // Frame
             if (y === 25 || y === 30) value = 12;
           }
-          // Bridge
           if (y >= 27 && y <= 28 && x >= 30 && x <= 33) value = 20;
         } else if (accessory === 'witch_hat') {
-          // Tall witch hat with detail
-          if (y >= 2 && y <= 12 && x >= 20 && x <= 43) {
-            // Hat cone
-            if (y <= 8) {
-              const width = (8 - y) * 3;
+          if (y >= 4 && y <= 14 && x >= 20 && x <= 43) {
+            if (y <= 10) {
+              const width = (10 - y) * 3;
               if (x >= 31 - width && x <= 31 + width) {
                 value = 20;
-                // Hat buckle
-                if (y >= 6 && y <= 7 && x >= 30 && x <= 33) value = 9;
+                if (y >= 8 && y <= 9 && x >= 30 && x <= 33) value = 9;
               }
             }
-            // Hat brim
-            if (y >= 9 && y <= 12) value = 20;
+            if (y >= 11 && y <= 14) value = 20;
           }
         } else if (accessory === 'crown') {
-          // Royal crown with jewels
-          if (y >= 4 && y <= 10 && x >= 24 && x <= 39) {
+          if (y >= 6 && y <= 12 && x >= 24 && x <= 39) {
             value = 20;
-            // Crown points
-            if (y >= 4 && y <= 6 && ((x - 24) % 5 === 0)) value = 9;
-            // Jewels
-            if (y === 8 && ((x - 26) % 4 === 0)) value = 7;
+            if (y >= 6 && y <= 8 && ((x - 24) % 5 === 0)) value = 9;
+            if (y === 10 && ((x - 26) % 4 === 0)) value = 7;
           }
         } else if (accessory === 'bandana') {
-          // Bandana with pattern
           if (y >= 12 && y <= 18 && x >= 20 && x <= 43) {
             value = 20;
-            // Bandana knot on side
             if (y >= 14 && y <= 16 && x >= 41 && x <= 46) value = 10;
-            // Pattern
             if ((x + y) % 4 < 2) value = 10;
           }
         }
@@ -604,7 +527,7 @@ export const PixelAvatar = ({ size = "medium", showCoins = true }: PixelAvatarPr
 
   const grid = createBaseGrid();
 
-  // Dynamic color mapping based on equipped items
+  // Dynamic color mapping
   const topColors: Record<string, { base: string; shade: string }> = {
     basic_shirt: { base: "#4A90E2", shade: "#357ABD" },
     striped_tee: { base: "#FF6B6B", shade: "#D63031" },
@@ -661,7 +584,7 @@ export const PixelAvatar = ({ size = "medium", showCoins = true }: PixelAvatarPr
       case 10: return currentTop.shade;
       case 11: return currentBottom.base;
       case 12: return currentBottom.shade;
-      case 13: return skin.mid; // mid-tone for smooth transitions
+      case 13: return skin.mid;
       case 20: return currentAccessory;
       default: return "transparent";
     }
