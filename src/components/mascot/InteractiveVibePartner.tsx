@@ -111,9 +111,8 @@ export const InteractiveVibePartner = ({
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <Heart className="w-6 h-6 text-primary" />
-                <h2 className="font-bold text-2xl text-foreground">Your Vibe Partner</h2>
+                <h2 className="font-bold text-2xl text-foreground">{name || `Your ${type.charAt(0).toUpperCase() + type.slice(1)} Friend`}</h2>
               </div>
-              <p className="text-lg text-muted-foreground">{name}</p>
             </div>
             <Button
               variant="ghost"

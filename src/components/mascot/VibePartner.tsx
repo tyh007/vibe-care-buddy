@@ -56,10 +56,11 @@ const getMascotExpression = (mood?: number, level?: number, type: 'cat' | 'dog' 
 };
 
 const getMoodMessage = (mood?: number, name?: string, type: 'cat' | 'dog' | 'panda' = 'cat') => {
+  const defaultName = name || `your ${type} friend`;
   const greetings = {
-    cat: `Meow~ I'm ${name || 'your Vibe Partner'}! Let's take care of ourselves together! 💙`,
-    dog: `Woof! I'm ${name || 'your Vibe Partner'}! So happy to see you! Let's have a great day! 💙`,
-    panda: `*munch munch* Hi! I'm ${name || 'your Vibe Partner'}! Let's grow stronger together! 💙`
+    cat: `Meow~ I'm ${defaultName}! Let's take care of ourselves together! 💙`,
+    dog: `Woof! I'm ${defaultName}! So happy to see you! Let's have a great day! 💙`,
+    panda: `*munch munch* Hi! I'm ${defaultName}! Let's grow stronger together! 💙`
   };
   
   const messages = {
@@ -131,9 +132,8 @@ export const VibePartner = ({ points, level, name, mood, type = 'cat', onCustomi
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <Heart className="w-4 h-4 text-primary" />
-              <h3 className="font-semibold text-foreground">Your Vibe Partner</h3>
+              <h3 className="font-semibold text-foreground">{name || `Your ${type.charAt(0).toUpperCase() + type.slice(1)} Friend`}</h3>
             </div>
-            <p className="text-sm text-muted-foreground">{name}</p>
           </div>
           <Button
             variant="ghost"

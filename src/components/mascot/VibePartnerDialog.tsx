@@ -67,7 +67,7 @@ export const VibePartnerDialog = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Heart className="w-5 h-5 text-primary" />
-            Your Vibe Partner
+            {currentName || `Your ${currentType.charAt(0).toUpperCase() + currentType.slice(1)} Friend`}
           </DialogTitle>
           <DialogDescription>
             Customize your companion and view your progress
@@ -116,7 +116,7 @@ export const VibePartnerDialog = ({
               <h4 className="font-medium text-sm">About Your Partner</h4>
               <Card className="p-4 bg-muted/50">
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Your Vibe Partner is here to support you on your wellness journey. 
+                  Your companion is here to support you on your wellness journey. 
                   They grow stronger as you take care of yourself, celebrating your wins 
                   and offering comfort during tough times. Think of them as your personal 
                   cheerleader and CBT coach combined! 💙

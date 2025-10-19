@@ -49,7 +49,7 @@ const VibePartnerChat = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8 space-y-2">
-            <h1 className="text-4xl font-bold text-foreground">Talk with Your Vibe Partner</h1>
+            <h1 className="text-4xl font-bold text-foreground">Talk with {partnerName || `Your ${partnerType.charAt(0).toUpperCase() + partnerType.slice(1)} Friend`}</h1>
             <p className="text-lg text-muted-foreground">
               Share your feelings, get support, and receive personalized wellness guidance
             </p>
@@ -91,7 +91,7 @@ const VibePartnerChat = () => {
           {/* Help text */}
           <div className="mt-8 text-center space-y-4">
             <p className="text-sm text-muted-foreground">
-              💡 Your Vibe Partner uses AI to provide empathetic support and CBT-based guidance
+              💡 {partnerName || `Your ${partnerType} friend`} uses AI to provide empathetic support and CBT-based guidance
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
               <div>✨ Trained in CBT techniques</div>
