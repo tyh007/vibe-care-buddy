@@ -46,8 +46,8 @@ const Dashboard = () => {
   const [partnerName, setPartnerName] = useState(() => 
     localStorage.getItem('vibePartnerName') || 'Vibe Buddy'
   );
-  const [partnerType, setPartnerType] = useState<'cat' | 'panda'>(() => 
-    (localStorage.getItem('vibePartnerType') as 'cat' | 'panda') || 'cat'
+  const [partnerType, setPartnerType] = useState<'cat' | 'dog' | 'panda'>(() => 
+    (localStorage.getItem('vibePartnerType') as 'cat' | 'dog' | 'panda') || 'cat'
   );
   const [addEventInitialDate, setAddEventInitialDate] = useState<Date | undefined>(calendarDate);
   
@@ -304,7 +304,7 @@ const Dashboard = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" onClick={() => navigate('/settings')}>
                 <Settings className="w-5 h-5" />
               </Button>
               <Button variant="ghost" size="icon" onClick={handleLogout}>
@@ -326,17 +326,22 @@ const Dashboard = () => {
           {/* Left Column: Mood Check, Vibe Partner & Suggestions */}
           <div className="lg:col-span-1 space-y-6">
             {/* Vibe Partner */}
-            <VibePartner
-              points={rewardSystem.points}
-              level={rewardSystem.level}
-              name={partnerName}
-              type={partnerType}
-              mood={moodHistory[moodHistory.length - 1]?.mood}
-              onCustomize={() => {
-                setPartnerName(localStorage.getItem('vibePartnerName') || 'Vibe Buddy');
-                setPartnerType((localStorage.getItem('vibePartnerType') as 'cat' | 'panda') || 'cat');
-              }}
-            />
+            <button
+              onClick={() => navigate('/vibe-partner')}
+              className="w-full cursor-pointer hover:scale-102 transition-transform"
+            >
+              <VibePartner
+                points={rewardSystem.points}
+                level={rewardSystem.level}
+                name={partnerName}
+                type={partnerType}
+                mood={moodHistory[moodHistory.length - 1]?.mood}
+                onCustomize={() => {
+                  setPartnerName(localStorage.getItem('vibePartnerName') || 'Vibe Buddy');
+                  setPartnerType((localStorage.getItem('vibePartnerType') as 'cat' | 'dog' | 'panda') || 'cat');
+                }}
+              />
+            </button>
 
             {/* Quick Mood Check-In */}
             <Card className="p-6 space-y-4 bg-card shadow-soft">

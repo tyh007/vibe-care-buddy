@@ -18,7 +18,7 @@ interface VibePartnerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentName: string;
-  currentType: 'cat' | 'panda';
+  currentType: 'cat' | 'dog' | 'panda';
   level: number;
   points: number;
   onCustomize: () => void;
@@ -52,7 +52,7 @@ export const VibePartnerDialog = ({
   onCustomize,
 }: VibePartnerDialogProps) => {
   const [newName, setNewName] = useState(currentName);
-  const [selectedType, setSelectedType] = useState<'cat' | 'panda'>(currentType);
+  const [selectedType, setSelectedType] = useState<'cat' | 'dog' | 'panda'>(currentType);
   
   const handleSave = () => {
     localStorage.setItem('vibePartnerName', newName);
@@ -92,7 +92,7 @@ export const VibePartnerDialog = ({
               <Card className="p-4 bg-gradient-to-br from-primary/5 to-secondary/5">
                 <div className="text-center space-y-3">
                   <div className="text-6xl">
-                    {selectedType === 'cat' ? '😺' : '🐼'}
+                    {selectedType === 'cat' ? '😺' : selectedType === 'dog' ? '🐶' : '🐼'}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="partner-name">Partner Name</Label>
@@ -100,7 +100,11 @@ export const VibePartnerDialog = ({
                       id="partner-name"
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
-                      placeholder={selectedType === 'cat' ? 'e.g., Whiskers' : 'e.g., Bamboo'}
+                      placeholder={
+                        selectedType === 'cat' ? 'e.g., Whiskers' : 
+                        selectedType === 'dog' ? 'e.g., Buddy' : 
+                        'e.g., Bamboo'
+                      }
                       maxLength={20}
                     />
                   </div>

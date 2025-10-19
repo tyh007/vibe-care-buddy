@@ -10,7 +10,7 @@ interface VibePartnerProps {
   level: number;
   name: string;
   mood?: number;
-  type?: 'cat' | 'panda';
+  type?: 'cat' | 'dog' | 'panda';
   onCustomize: () => void;
 }
 
@@ -22,8 +22,16 @@ const MASCOT_TYPES = {
     excited: "😸",
     loving: "😻",
     calm: "😽",
-    comforting: "🙀➡️😿",
+    comforting: "😿",
     default: "😺"
+  },
+  dog: {
+    happy: "🐕",
+    excited: "🐶",
+    loving: "🐕‍🦺",
+    calm: "🐕",
+    comforting: "🐶",
+    default: "🐶"
   },
   panda: {
     happy: "🐼",
@@ -35,7 +43,7 @@ const MASCOT_TYPES = {
   }
 };
 
-const getMascotExpression = (mood?: number, level?: number, type: 'cat' | 'panda' = 'cat') => {
+const getMascotExpression = (mood?: number, level?: number, type: 'cat' | 'dog' | 'panda' = 'cat') => {
   const mascot = MASCOT_TYPES[type];
   
   if (!mood) return mascot.default;
@@ -47,9 +55,10 @@ const getMascotExpression = (mood?: number, level?: number, type: 'cat' | 'panda
   return mascot.default;
 };
 
-const getMoodMessage = (mood?: number, name?: string, type: 'cat' | 'panda' = 'cat') => {
+const getMoodMessage = (mood?: number, name?: string, type: 'cat' | 'dog' | 'panda' = 'cat') => {
   const greetings = {
     cat: `Meow~ I'm ${name || 'your Vibe Partner'}! Let's take care of ourselves together! 💙`,
+    dog: `Woof! I'm ${name || 'your Vibe Partner'}! So happy to see you! Let's have a great day! 💙`,
     panda: `*munch munch* Hi! I'm ${name || 'your Vibe Partner'}! Let's grow stronger together! 💙`
   };
   
@@ -60,6 +69,13 @@ const getMoodMessage = (mood?: number, name?: string, type: 'cat' | 'panda' = 'c
       3: "*content purr* You're doing okay! Every little step forward counts. 😌",
       4: "*happy tail wiggle* You're feeling good today! Your positive energy is purr-fect! 🌟",
       5: "*excited zoom* Wow, you're absolutely glowing! I'm so proud of your progress! ✨"
+    },
+    dog: {
+      1: "*gentle nuzzle* I see you're having a tough time. That's okay - I'm right here beside you. 🤗",
+      2: "*sits close* Some days are ruff. Let's take it slow, one paw at a time. 💙",
+      3: "*happy tail wag* You're doing great! Keep going, I believe in you! 😌",
+      4: "*playful bounce* You're feeling wonderful! Let's keep this pawsitive energy! 🌟",
+      5: "*excited zoomies* Amazing! You're doing pawsitively incredible today! ✨"
     },
     panda: {
       1: "*offers bamboo* I see you're having a tough time. That's okay - even pandas need rest days. I'm here. 🤗",
