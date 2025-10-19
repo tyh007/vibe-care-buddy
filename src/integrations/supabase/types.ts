@@ -52,6 +52,45 @@ export type Database = {
           },
         ]
       }
+      mood_entries: {
+        Row: {
+          created_at: string
+          hydration_ml: number | null
+          id: string
+          location: string | null
+          mood: number
+          notes: string | null
+          physical_activity_minutes: number | null
+          screen_time_minutes: number | null
+          sleep_hours: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hydration_ml?: number | null
+          id?: string
+          location?: string | null
+          mood: number
+          notes?: string | null
+          physical_activity_minutes?: number | null
+          screen_time_minutes?: number | null
+          sleep_hours?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hydration_ml?: number | null
+          id?: string
+          location?: string | null
+          mood?: number
+          notes?: string | null
+          physical_activity_minutes?: number | null
+          screen_time_minutes?: number | null
+          sleep_hours?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           accessory: string | null

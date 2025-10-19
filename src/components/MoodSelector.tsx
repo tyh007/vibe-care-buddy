@@ -78,6 +78,11 @@ export const MoodSelector = () => {
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
   const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
   const [note, setNote] = useState("");
+  const [sleepHours, setSleepHours] = useState<number>(7);
+  const [physicalActivity, setPhysicalActivity] = useState<number>(30);
+  const [screenTime, setScreenTime] = useState<number>(120);
+  const [hydration, setHydration] = useState<number>(2000);
+  const [location, setLocation] = useState<string>("");
   const { toast } = useToast();
 
   const selectedMoodData = moods.find(m => m.value === selectedMood);
@@ -102,78 +107,102 @@ export const MoodSelector = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Save to localStorage for demo compatibility
+      if (!user) {
+        toast({
+          title: "Please sign in",
+          description: "You need to be signed in to track your mood.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Save to database
+      const { error: insertError } = await supabase
+        .from("mood_entries")
+        .insert({
+          user_id: user.id,
+          mood: selectedMood,
+          sleep_hours: sleepHours,
+          physical_activity_minutes: physicalActivity,
+          screen_time_minutes: screenTime,
+          hydration_ml: hydration,
+          location: location || null,
+          notes: note || null,
+        });
+
+      if (insertError) throw insertError;
+
+      // Also save to localStorage for backwards compatibility
       const moodEntry = {
         mood: selectedMood,
         reasons: selectedReasons,
         note,
         timestamp: new Date().toISOString(),
+        location,
       };
-
       const existingEntries = JSON.parse(localStorage.getItem("moodEntries") || "[]");
       localStorage.setItem("moodEntries", JSON.stringify([moodEntry, ...existingEntries]));
 
-      // Award coins if user is logged in
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("coins, last_check_in, current_streak, longest_streak, total_check_ins")
-          .eq("id", user.id)
-          .single();
+      // Award coins and update streak
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("coins, last_check_in, current_streak, longest_streak, total_check_ins")
+        .eq("user_id", user.id)
+        .maybeSingle();
 
-        if (profile) {
-          const today = new Date().toDateString();
-          const lastCheckIn = profile.last_check_in ? new Date(profile.last_check_in).toDateString() : null;
-          
-          let coinsEarned = 10; // Base reward
-          let newStreak = profile.current_streak || 0;
-          
-          // Check if this is a new day
-          if (lastCheckIn !== today) {
-            // Update streak
-            if (lastCheckIn === new Date(Date.now() - 86400000).toDateString()) {
-              newStreak += 1;
-            } else if (lastCheckIn !== null) {
-              newStreak = 1;
-            } else {
-              newStreak = 1;
-            }
-            
-            // Bonus coins for streak
-            coinsEarned += Math.floor(newStreak / 7) * 5;
-
-            await supabase
-              .from("profiles")
-              .update({
-                coins: (profile.coins || 0) + coinsEarned,
-                last_check_in: new Date().toISOString().split('T')[0],
-                current_streak: newStreak,
-                longest_streak: Math.max(newStreak, profile.longest_streak || 0),
-                total_check_ins: (profile.total_check_ins || 0) + 1
-              })
-              .eq("id", user.id);
-
-            toast({
-              title: "Mood saved! 🎉",
-              description: `You earned ${coinsEarned} coins! Streak: ${newStreak} days`,
-            });
+      if (profile) {
+        const today = new Date().toDateString();
+        const lastCheckIn = profile.last_check_in ? new Date(profile.last_check_in).toDateString() : null;
+        
+        let coinsEarned = 10; // Base reward
+        let newStreak = profile.current_streak || 0;
+        
+        // Check if this is a new day
+        if (lastCheckIn !== today) {
+          // Update streak
+          if (lastCheckIn === new Date(Date.now() - 86400000).toDateString()) {
+            newStreak += 1;
+          } else if (lastCheckIn !== null) {
+            newStreak = 1;
           } else {
-            toast({
-              title: "Mood updated!",
-              description: "You've already checked in today.",
-            });
+            newStreak = 1;
           }
+          
+          // Bonus coins for streak
+          coinsEarned += Math.floor(newStreak / 7) * 5;
+
+          await supabase
+            .from("profiles")
+            .update({
+              coins: (profile.coins || 0) + coinsEarned,
+              last_check_in: new Date().toISOString().split('T')[0],
+              current_streak: newStreak,
+              longest_streak: Math.max(newStreak, profile.longest_streak || 0),
+              total_check_ins: (profile.total_check_ins || 0) + 1
+            })
+            .eq("user_id", user.id);
+
+          toast({
+            title: "Wellness check-in saved! 🎉",
+            description: `You earned ${coinsEarned} coins! Streak: ${newStreak} days`,
+          });
+        } else {
+          toast({
+            title: "Check-in updated!",
+            description: "You've already checked in today.",
+          });
         }
-      } else {
-        toast({
-          title: "Mood saved!",
-          description: "Your mood has been recorded.",
-        });
       }
 
+      // Reset form
       setSelectedMood(null);
       setSelectedReasons([]);
       setNote("");
+      setSleepHours(7);
+      setPhysicalActivity(30);
+      setScreenTime(120);
+      setHydration(2000);
+      setLocation("");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -224,6 +253,91 @@ export const MoodSelector = () => {
           </div>
         </div>
       )}
+
+      {/* Wellness Metrics */}
+      <div className="space-y-6 mb-6 p-5 rounded-xl glass border border-border/50">
+        <h4 className="font-display font-bold text-lg mb-4">Daily Wellness Metrics</h4>
+        
+        {/* Sleep */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">Sleep (hours)</label>
+            <span className="text-sm text-muted-foreground">{sleepHours}h</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="12"
+            step="0.5"
+            value={sleepHours}
+            onChange={(e) => setSleepHours(parseFloat(e.target.value))}
+            className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-border/50"
+          />
+        </div>
+
+        {/* Physical Activity */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">Physical Activity (minutes)</label>
+            <span className="text-sm text-muted-foreground">{physicalActivity} min</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="180"
+            step="5"
+            value={physicalActivity}
+            onChange={(e) => setPhysicalActivity(parseInt(e.target.value))}
+            className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-border/50"
+          />
+        </div>
+
+        {/* Screen Time */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">Screen Time (minutes)</label>
+            <span className="text-sm text-muted-foreground">{screenTime} min ({(screenTime / 60).toFixed(1)}h)</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="720"
+            step="15"
+            value={screenTime}
+            onChange={(e) => setScreenTime(parseInt(e.target.value))}
+            className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-border/50"
+          />
+        </div>
+
+        {/* Hydration */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">Hydration (ml)</label>
+            <span className="text-sm text-muted-foreground">{hydration} ml ({(hydration / 1000).toFixed(1)}L)</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="4000"
+            step="100"
+            value={hydration}
+            onChange={(e) => setHydration(parseInt(e.target.value))}
+            className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-border/50"
+          />
+        </div>
+
+        {/* Location */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Location (optional)</label>
+          <input
+            type="text"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="e.g., Home, Office, Gym, Park..."
+            className="w-full px-4 py-2 rounded-lg border border-border/50 bg-background/50 focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
+        </div>
+      </div>
 
       <Textarea
         placeholder="Add any additional notes (optional)"
