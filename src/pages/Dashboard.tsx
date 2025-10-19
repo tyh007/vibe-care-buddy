@@ -426,7 +426,7 @@ const Dashboard = () => {
                   {/* Vibe Partner */}
                   <button
                     onClick={() => navigate('/vibe-partner')}
-                    className="w-full hover:opacity-80 transition-opacity"
+                    className="w-full transition-opacity"
                   >
                     <VibePartner
                       points={rewardSystem.points}
@@ -553,7 +553,7 @@ const Dashboard = () => {
             {/* Vibe Partner */}
             <button
               onClick={() => navigate('/vibe-partner')}
-              className="w-full hover:opacity-80 transition-opacity"
+              className="w-full transition-opacity"
             >
               <VibePartner
                 points={rewardSystem.points}
