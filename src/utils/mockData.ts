@@ -162,12 +162,21 @@ export const initializeMockData = () => {
         note = notes[Math.floor(Math.random() * notes.length)];
       }
 
+      // Calculate screen time for this entry (varies throughout the day)
+      const entryScreenTime = isWeekend 
+        ? Math.floor(120 + Math.random() * 90)  // 120-210 min on weekends
+        : Math.floor(60 + Math.random() * 120);  // 60-180 min on weekdays
+      
       moodEntries.push({
         mood,
         reasons: selectedReasons,
         note,
         timestamp: entryTime.toISOString(),
         location: primaryLocation,
+        sleep_hours: parseFloat(sleepHours.toFixed(1)),
+        physical_activity_minutes: exerciseMinutes,
+        screen_time_minutes: entryScreenTime,
+        hydration_ml: waterGlasses * 250, // Convert glasses to ml (1 glass = 250ml)
       });
     }
 
