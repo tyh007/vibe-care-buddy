@@ -54,24 +54,123 @@ export type Database = {
       }
       profiles: {
         Row: {
+          accessory: string | null
+          bottom: string | null
+          coins: number | null
           created_at: string
+          current_streak: number | null
           display_name: string | null
+          eye_color: string | null
+          hair_color: string | null
+          hairstyle: string | null
           id: string
+          last_check_in: string | null
+          longest_streak: number | null
+          top: string | null
+          total_check_ins: number | null
           user_id: string
         }
         Insert: {
+          accessory?: string | null
+          bottom?: string | null
+          coins?: number | null
           created_at?: string
+          current_streak?: number | null
           display_name?: string | null
+          eye_color?: string | null
+          hair_color?: string | null
+          hairstyle?: string | null
           id?: string
+          last_check_in?: string | null
+          longest_streak?: number | null
+          top?: string | null
+          total_check_ins?: number | null
           user_id: string
         }
         Update: {
+          accessory?: string | null
+          bottom?: string | null
+          coins?: number | null
           created_at?: string
+          current_streak?: number | null
           display_name?: string | null
+          eye_color?: string | null
+          hair_color?: string | null
+          hairstyle?: string | null
           id?: string
+          last_check_in?: string | null
+          longest_streak?: number | null
+          top?: string | null
+          total_check_ins?: number | null
           user_id?: string
         }
         Relationships: []
+      }
+      shop_items: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          icon: string
+          id: string
+          name: string
+          price: number
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          icon: string
+          id?: string
+          name: string
+          price: number
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
+      user_inventory: {
+        Row: {
+          id: string
+          item_id: string
+          purchased_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          item_id: string
+          purchased_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          item_id?: string
+          purchased_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_inventory_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "shop_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_inventory_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
     }
     Views: {

@@ -10,6 +10,9 @@ import Dashboard from "./pages/Dashboard";
 import VibePartnerChat from "./pages/VibePartnerChat";
 import CBTTherapist from "./pages/CBTTherapist";
 import CommonRoom from "./pages/CommonRoom";
+import Shop from "./pages/Shop";
+import MoodTracker from "./pages/MoodTracker";
+import MoodDashboard from "./pages/MoodDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +31,9 @@ const App = () => (
           <Route path="/vibe-partner" element={<VibePartnerChat />} />
           <Route path="/cbt-therapist" element={<CBTTherapist />} />
           <Route path="/common-room" element={<CommonRoom />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/mood-tracker" element={<MoodTracker />} />
+          <Route path="/mood-dashboard" element={<MoodDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
