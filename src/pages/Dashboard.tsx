@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Calendar, Heart, LogOut, CalendarDays, LayoutGrid, Brain } from "lucide-react";
+import { Calendar, Heart, LogOut, CalendarDays, LayoutGrid, Brain, BookOpen, Tag, Menu, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { MoodTimeline } from "@/components/MoodTimeline";
@@ -25,7 +25,7 @@ interface CalendarEvent {
   title: string;
   start: string;
   end: string;
-  date: string; // YYYY-MM-DD format
+  date: string;
   category: string;
   notes?: string;
   color?: string;
@@ -40,8 +40,9 @@ const Dashboard = () => {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Reward system
   const rewardSystem = useRewardSystem();
   const [partnerName, setPartnerName] = useState(() => 
     localStorage.getItem('vibePartnerName') || 'Vibe Buddy'
@@ -51,7 +52,13 @@ const Dashboard = () => {
   );
   const [addEventInitialDate, setAddEventInitialDate] = useState<Date | undefined>(calendarDate);
   
-  // Sample mood data with dates and events (last 7 days)
+  const categories = [
+    { id: 'all', name: 'All Events', icon: LayoutGrid, color: 'hsl(var(--primary))' },
+    { id: 'academic', name: 'Academic', icon: BookOpen, color: '#8b5cf6' },
+    { id: 'personal', name: 'Personal', icon: Heart, color: '#ec4899' },
+    { id: 'wellness', name: 'Wellness', icon: Brain, color: '#10b981' },
+  ];
+  
   const [moodHistory, setMoodHistory] = useState<MoodEntry[]>(() => {
     const saved = localStorage.getItem('vc_moods');
     if (saved) {
@@ -68,7 +75,6 @@ const Dashboard = () => {
     ];
   });
 
-  // Calendar events with ISO timestamps for week view
   const [events, setEvents] = useState<CalendarEvent[]>(() => {
     const saved = localStorage.getItem('vc_events');
     if (saved) {
@@ -78,46 +84,24 @@ const Dashboard = () => {
       {
         id: '1',
         title: 'Introduction to Psychology',
-        start: '09:00',
-        end: '10:00',
-        date: format(new Date(), 'yyyy-MM-dd'),
-        category: 'class',
-        notes: 'Review chapters 3-4',
+        start: '2024-03-25T09:00',
+        end: '2024-03-25T10:30',
+        date: '2024-03-25',
+        category: 'academic',
         color: '#8b5cf6'
       },
       {
         id: '2',
-        title: 'Study Group - Statistics',
-        start: '11:00',
-        end: '13:00',
-        date: format(new Date(), 'yyyy-MM-dd'),
-        category: 'study',
-        notes: 'Bring practice problems',
-        color: '#ec4899'
-      },
-      {
-        id: '3',
-        title: 'Computer Science Lab',
-        start: '15:30',
-        end: '17:00',
-        date: format(new Date(), 'yyyy-MM-dd'),
-        category: 'class',
+        title: 'Calculus II',
+        start: '2024-03-25T14:00',
+        end: '2024-03-25T15:30',
+        date: '2024-03-25',
+        category: 'academic',
         color: '#8b5cf6'
-      },
-      {
-        id: '4',
-        title: 'Yoga Class',
-        start: '18:00',
-        end: '19:00',
-        date: format(new Date(), 'yyyy-MM-dd'),
-        category: 'wellness',
-        notes: 'Bring yoga mat',
-        color: '#10b981'
       }
     ];
   });
 
-  // Persist events and moods to localStorage
   useEffect(() => {
     localStorage.setItem('vc_events', JSON.stringify(events));
   }, [events]);
@@ -126,140 +110,91 @@ const Dashboard = () => {
     localStorage.setItem('vc_moods', JSON.stringify(moodHistory));
   }, [moodHistory]);
 
-  const handleLogout = () => {
-    // TODO: Implement actual logout
-    navigate('/');
-  };
-
-  const handleMoodSelect = (moodIndex: number) => {
-    setSelectedMood(moodIndex);
-    const mood = moodIndex + 1; // Convert 0-4 index to 1-5 scale
-    
-    // Get today's events from the schedule (simplified - in real app would come from calendar)
-    const todayEvents = ['Morning Walk', 'Productive Study Session'];
-    
-    // Update mood history - replace today's entry or add new one
+  const handleMoodSelect = (mood: number) => {
     const today = format(new Date(), 'yyyy-MM-dd');
-    const newEntry: MoodEntry = { date: today, mood, events: todayEvents };
-    
-    setMoodHistory(prev => {
-      const existingIndex = prev.findIndex(entry => entry.date === today);
-      if (existingIndex >= 0) {
-        const updated = [...prev];
-        updated[existingIndex] = newEntry;
-        return updated;
-      }
-      return [...prev.slice(1), newEntry];
-    });
-    
-    // Award points for mood check-in
-    rewardSystem.rewardMoodCheckIn();
-  };
-
-  const handleAddEvent = () => {
-    setAddEventInitialDate(calendarDate);
-    setIsAddEventOpen(true);
-  };
-
-  const handleEventCreate = (newEvent: Omit<CalendarEvent, 'id'> & { date?: Date }) => {
-    const eventDate = newEvent.date || new Date();
-    
-    const event: CalendarEvent = {
-      title: newEvent.title,
-      start: newEvent.start,
-      end: newEvent.end,
-      date: format(eventDate, 'yyyy-MM-dd'),
-      category: newEvent.category,
-      notes: newEvent.notes,
-      color: newEvent.color,
-      id: Date.now().toString(),
+    const newEntry: MoodEntry = {
+      date: today,
+      mood: mood + 1,
+      events: []
     };
-    
-    setEvents([...events, event].sort((a, b) => {
-      // Sort by date first, then by time
-      if (a.date !== b.date) return a.date.localeCompare(b.date);
-      return a.start.localeCompare(b.start);
-    }));
-    
-    // Award points for event creation
-    rewardSystem.rewardEventCreation();
-  };
 
-  const handleEventUpdate = (eventId: string, updates: Partial<CalendarEvent>) => {
-    setEvents(events.map(e => 
-      e.id === eventId ? { ...e, ...updates } : e
-    ));
-    
-    toast({
-      title: "Event Updated! ✏️",
-      description: "Your changes have been saved.",
-    });
-  };
-
-  const handleEventDelete = (eventId: string) => {
-    setEvents(events.filter(e => e.id !== eventId));
-    
-    toast({
-      title: "Event Deleted! 🗑️",
-      description: "The event has been removed from your calendar.",
-    });
-  };
-
-  const handleAcceptSuggestion = (suggestion: any) => {
-    const today = format(new Date(), 'yyyy-MM-dd');
-    
-    // Find the next available free slot
-    const todayEvents = events.filter(e => e.date === today);
-    const sortedEvents = todayEvents.sort((a, b) => a.start.localeCompare(b.start));
-    let suggestedStart = "14:00"; // Default afternoon slot
-    
-    // Try to find a gap after study sessions
-    for (let i = 0; i < sortedEvents.length - 1; i++) {
-      const current = sortedEvents[i];
-      const next = sortedEvents[i + 1];
-      
-      if (current.category === 'study' || current.category === 'class') {
-        const [endHour, endMin] = current.end.split(':').map(Number);
-        const [nextHour, nextMin] = next.start.split(':').map(Number);
-        const gapMinutes = (nextHour * 60 + nextMin) - (endHour * 60 + endMin);
-        
-        if (gapMinutes >= suggestion.duration) {
-          suggestedStart = current.end;
-          break;
-        }
-      }
+    const existingIndex = moodHistory.findIndex(entry => entry.date === today);
+    if (existingIndex >= 0) {
+      setMoodHistory(prev => prev.map((entry, idx) => 
+        idx === existingIndex ? newEntry : entry
+      ));
+    } else {
+      setMoodHistory(prev => [...prev, newEntry]);
     }
+
+    setSelectedMood(mood);
+    rewardSystem.rewardMoodCheckIn();
     
-    const [startHour, startMin] = suggestedStart.split(':').map(Number);
-    const endMinutes = startHour * 60 + startMin + suggestion.duration;
-    const endHour = Math.floor(endMinutes / 60);
-    const endMin = endMinutes % 60;
-    const suggestedEnd = `${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
+    toast({
+      title: "Mood logged! 📊",
+      description: "Great job checking in with yourself.",
+    });
+  };
+
+  const handleAddEvent = (event?: Omit<CalendarEvent, 'id'> & { date?: Date }) => {
+    if (event) {
+      const eventDate = event.date && !isNaN(event.date.getTime())
+        ? format(event.date, 'yyyy-MM-dd')
+        : format(new Date(), 'yyyy-MM-dd');
+        
+      const newEvent: CalendarEvent = {
+        id: Date.now().toString(),
+        title: event.title,
+        start: event.start,
+        end: event.end,
+        date: eventDate,
+        category: event.category,
+        notes: event.notes,
+        color: event.category === 'academic' ? '#8b5cf6' : event.category === 'personal' ? '#ec4899' : '#10b981'
+      };
+      
+      setEvents([...events, newEvent]);
+      rewardSystem.rewardEventCreation();
+      
+      toast({
+        title: "Event added! ✅",
+        description: "Your schedule is looking organized.",
+      });
+      
+      setIsAddEventOpen(false);
+    } else {
+      setIsAddEventOpen(true);
+    }
+  };
+
+  const handleAcceptSuggestion = (suggestion: { title: string; category: string }) => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
     
     const newEvent: CalendarEvent = {
       id: Date.now().toString(),
       title: suggestion.title,
-      start: suggestedStart,
-      end: suggestedEnd,
-      date: today,
-      category: 'wellness',
-      notes: suggestion.description,
+      start: format(tomorrow, "yyyy-MM-dd'T'10:00"),
+      end: format(tomorrow, "yyyy-MM-dd'T'11:00"),
+      date: format(tomorrow, 'yyyy-MM-dd'),
+      category: suggestion.category,
+      color: suggestion.category === 'academic' ? '#8b5cf6' : suggestion.category === 'personal' ? '#ec4899' : '#10b981'
     };
     
-    setEvents([...events, newEvent].sort((a, b) => {
-      if (a.date !== b.date) return a.date.localeCompare(b.date);
-      return a.start.localeCompare(b.start);
-    }));
-    
-    // Award points for completing activity
+    setEvents([...events, newEvent]);
     rewardSystem.rewardActivityCompletion();
+    
+    toast({
+      title: "Suggestion accepted! 💡",
+      description: "Added to your calendar.",
+    });
   };
 
-  const handleDropSuggestion = (suggestionData: any, slotStart: string) => {
-    // This would be called when dragging a suggestion to a specific time slot
+  const handleLogout = () => {
+    navigate('/auth');
     toast({
-      title: "Drop to Schedule",
-      description: "Drag and drop feature - click 'Quick Add' to schedule instantly!",
+      title: "Logged out",
+      description: "See you next time!",
     });
   };
 
@@ -267,13 +202,24 @@ const Dashboard = () => {
     setCalendarView(view);
   };
   
+  const handleDeleteEvent = (eventId: string) => {
+    setEvents(events.filter(e => e.id !== eventId));
+    setSelectedEvent(null);
+    setIsNotesOpen(false);
+    
+    toast({
+      title: "Event deleted",
+      description: "The event has been removed.",
+    });
+  };
+  
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
     setIsNotesOpen(true);
+    setIsMobileMenuOpen(false); // Close mobile menu
   };
   
   const handleTimeSlotClick = (date: Date, time: string) => {
-    // Open add event dialog with pre-filled date
     setAddEventInitialDate(date);
     setIsAddEventOpen(true);
   };
@@ -287,66 +233,192 @@ const Dashboard = () => {
     setEvents(events.map(e => 
       e.id === eventId ? { ...e, notes } : e
     ));
-    
-    // Award points for taking notes
     rewardSystem.rewardNotesTaken();
   };
 
+  const filteredEvents = selectedCategory === 'all' 
+    ? events 
+    : events.filter(e => e.category === selectedCategory);
+
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      {/* Header */}
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Heart className="w-6 h-6 text-primary" />
-              <span className="font-bold text-xl text-foreground">VibeCare</span>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
-                <LogOut className="w-5 h-5" />
+    <div className="min-h-screen flex w-full bg-gradient-hero">
+      {/* Left Sidebar - Desktop */}
+      <aside className="hidden lg:flex w-64 flex-col border-r border-border bg-card/80 backdrop-blur-sm">
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6 space-y-6">
+            {/* Header */}
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Heart className="w-6 h-6 text-primary" />
+                <span className="font-bold text-xl text-foreground">VibeCare</span>
+              </div>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground">
+                <LogOut className="w-4 h-4" />
+                Sign Out
               </Button>
+            </div>
+
+            {/* Categories */}
+            <div>
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3 px-2">Categories</h3>
+              <div className="space-y-1">
+                {categories.map((cat) => (
+                  <Button
+                    key={cat.id}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`w-full justify-start gap-3 ${
+                      selectedCategory === cat.id 
+                        ? 'bg-primary/10 text-primary font-medium' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    <cat.icon className="w-4 h-4" />
+                    <span>{cat.name}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div>
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3 px-2">Quick Access</h3>
+              <div className="space-y-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/vibe-partner')}
+                  className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+                >
+                  <Heart className="w-4 h-4" />
+                  Vibe Partner
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/cbt-therapist')}
+                  className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+                >
+                  <Brain className="w-4 h-4" />
+                  CBT Therapist
+                </Button>
+              </div>
+            </div>
+
+            {/* Mini Vibe Partner */}
+            <div className="pt-4 border-t border-border">
+              <button
+                onClick={() => navigate('/vibe-partner')}
+                className="w-full hover:opacity-80 transition-opacity"
+              >
+                <VibePartner
+                  points={rewardSystem.points}
+                  level={rewardSystem.level}
+                  name={partnerName}
+                  type={partnerType}
+                  mood={moodHistory[moodHistory.length - 1]?.mood}
+                  onCustomize={() => {
+                    setPartnerName(localStorage.getItem('vibePartnerName') || 'Vibe Buddy');
+                    setPartnerType((localStorage.getItem('vibePartnerType') as 'cat' | 'dog' | 'panda') || 'cat');
+                  }}
+                />
+              </button>
             </div>
           </div>
         </div>
-      </header>
+      </aside>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8 space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">Welcome back, Alex! 👋</h1>
-          <p className="text-muted-foreground">Here's your wellness dashboard for today</p>
+      {/* Mobile Header with Hamburger */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-2">
+            <Heart className="w-6 h-6 text-primary" />
+            <span className="font-bold text-xl text-foreground">VibeCare</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </Button>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left Column: Mood Check, Vibe Partner & Suggestions */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Vibe Partner */}
-            <button
-              onClick={() => navigate('/vibe-partner')}
-              className="w-full cursor-pointer hover:scale-102 transition-transform"
-            >
-              <VibePartner
-                points={rewardSystem.points}
-                level={rewardSystem.level}
-                name={partnerName}
-                type={partnerType}
-                mood={moodHistory[moodHistory.length - 1]?.mood}
-                onCustomize={() => {
-                  setPartnerName(localStorage.getItem('vibePartnerName') || 'Vibe Buddy');
-                  setPartnerType((localStorage.getItem('vibePartnerType') as 'cat' | 'dog' | 'panda') || 'cat');
-                }}
-              />
-            </button>
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="border-t border-border bg-card p-4 space-y-4">
+            <div>
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Categories</h3>
+              <div className="space-y-1">
+                {categories.map((cat) => (
+                  <Button
+                    key={cat.id}
+                    variant={selectedCategory === cat.id ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => {
+                      setSelectedCategory(cat.id);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full justify-start gap-2"
+                  >
+                    <cat.icon className="w-4 h-4" />
+                    {cat.name}
+                  </Button>
+                ))}
+              </div>
+            </div>
 
-            {/* Quick Mood Check-In */}
-            <Card className="p-6 space-y-4 bg-card shadow-soft">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-lg text-card-foreground">Quick Mood Check</h3>
+            <div className="space-y-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  navigate('/vibe-partner');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full justify-start gap-2"
+              >
+                <Heart className="w-4 h-4" />
+                Vibe Partner
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  navigate('/cbt-therapist');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full justify-start gap-2"
+              >
+                <Brain className="w-4 h-4" />
+                CBT Therapist
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="w-full justify-start gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden pt-16 lg:pt-0">
+        {/* Central Calendar View (70%) */}
+        <div className="flex-1 lg:w-[70%] overflow-y-auto">
+          <div className="p-4 lg:p-6 space-y-6">
+            {/* Mood Check */}
+            <Card className="p-4 bg-card/80 backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-foreground">Quick Mood Check</h3>
                 <Heart className="w-5 h-5 text-secondary" />
               </div>
-              
               <div className="flex justify-between gap-2">
                 {['😢', '😕', '😐', '🙂', '😊'].map((emoji, idx) => (
                   <button
@@ -354,53 +426,19 @@ const Dashboard = () => {
                     onClick={() => handleMoodSelect(idx)}
                     className={`w-12 h-12 rounded-full transition-all text-2xl flex items-center justify-center ${
                       selectedMood === idx 
-                        ? 'bg-primary text-primary-foreground shadow-medium scale-110' 
-                        : 'bg-muted hover:bg-primary/10 hover:scale-110'
+                        ? 'bg-primary text-primary-foreground shadow-lg scale-110' 
+                        : 'bg-muted hover:bg-primary/10 hover:scale-105'
                     }`}
                   >
                     {emoji}
                   </button>
                 ))}
               </div>
-              
-              <p className="text-sm text-muted-foreground text-center">How are you feeling right now?</p>
+              <p className="text-xs text-muted-foreground text-center mt-2">How are you feeling right now?</p>
             </Card>
 
-            {/* CBT Therapist Access */}
-            <Card className="p-6 space-y-4 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20 cursor-pointer hover:shadow-lg transition-all"
-              onClick={() => navigate('/cbt-therapist')}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Brain className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-foreground">CBT Therapist</h3>
-                  <p className="text-sm text-muted-foreground">Professional support available</p>
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Talk to our AI-powered CBT therapist for evidence-based mental health support
-              </p>
-              <Button variant="outline" size="sm" className="w-full">
-                Start Session
-              </Button>
-            </Card>
-
-            {/* Smart Suggestion Engine */}
-            <SuggestionEngine 
-              events={events}
-              onAcceptSuggestion={handleAcceptSuggestion}
-            />
-
-            {/* Interactive Mood Timeline */}
-            <MoodTimeline data={moodHistory} />
-          </div>
-
-          {/* Right Column: Calendar Views */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* View controls */}
-            <div className="flex justify-between items-center">
+            {/* Calendar Controls */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex gap-2">
                 <Button
                   variant={calendarView === 'week' ? 'default' : 'outline'}
@@ -419,16 +457,16 @@ const Dashboard = () => {
                   Month
                 </Button>
               </div>
-              <Button variant="hero" size="sm" onClick={handleAddEvent}>
+              <Button variant="default" size="sm" onClick={() => setIsAddEventOpen(true)}>
                 <Calendar className="w-4 h-4 mr-2" />
                 Add Event
               </Button>
             </div>
 
-            {/* Calendar view */}
+            {/* Calendar View */}
             {calendarView === 'week' ? (
               <CalendarWeekView
-                events={events}
+                events={filteredEvents}
                 moods={moodHistory}
                 currentDate={calendarDate}
                 onDateChange={setCalendarDate}
@@ -437,7 +475,7 @@ const Dashboard = () => {
               />
             ) : (
               <CalendarMonthView
-                events={events}
+                events={filteredEvents}
                 moods={moodHistory}
                 currentDate={calendarDate}
                 onDateChange={setCalendarDate}
@@ -445,47 +483,49 @@ const Dashboard = () => {
               />
             )}
 
-            {/* Course legend */}
-            <Card className="p-4 bg-card/50">
-              <h4 className="font-semibold text-sm mb-3">Course Legend</h4>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded" style={{ backgroundColor: '#8b5cf6' }} />
-                  <span>Class</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded" style={{ backgroundColor: '#ec4899' }} />
-                  <span>Study</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded" style={{ backgroundColor: '#10b981' }} />
-                  <span>Wellness</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded" style={{ backgroundColor: '#f59e0b' }} />
-                  <span>Social</span>
-                </div>
-              </div>
-            </Card>
+            {/* Mood Timeline - Desktop Only */}
+            <div className="hidden lg:block">
+              <MoodTimeline data={moodHistory} />
+            </div>
+
+            {/* Suggestion Engine - Desktop Only */}
+            <div className="hidden lg:block">
+              <SuggestionEngine 
+                events={filteredEvents}
+                onAcceptSuggestion={handleAcceptSuggestion}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Notes Editor Sidebar */}
-      <NotesEditorSidebar
-        event={selectedEvent}
-        isOpen={isNotesOpen}
-        onClose={() => setIsNotesOpen(false)}
-        onSave={handleSaveNotes}
-        onUpdate={handleEventUpdate}
-        onDelete={handleEventDelete}
-      />
+        {/* Right Context Panel (30%) - Desktop, overlay on mobile */}
+        <aside className={`
+          ${selectedEvent || isNotesOpen ? 'fixed inset-0 z-40 lg:relative lg:inset-auto' : 'hidden'}
+          lg:block lg:w-[30%] border-l border-border bg-card/95 lg:bg-card/80 backdrop-blur-sm overflow-y-auto
+        `}>
+          <NotesEditorSidebar
+            event={selectedEvent}
+            isOpen={isNotesOpen || !!selectedEvent}
+            onClose={() => {
+              setIsNotesOpen(false);
+              setSelectedEvent(null);
+            }}
+            onSave={handleSaveNotes}
+            onUpdate={(eventId: string, updates: Partial<CalendarEvent>) => {
+              setEvents(prev => prev.map(e => 
+                e.id === eventId ? { ...e, ...updates } : e
+              ));
+            }}
+            onDelete={handleDeleteEvent}
+          />
+        </aside>
+      </main>
 
-      {/* Add Event Dialog */}
+      {/* Dialogs */}
       <AddEventDialog
         open={isAddEventOpen}
         onOpenChange={setIsAddEventOpen}
-        onAddEvent={handleEventCreate}
+        onAddEvent={handleAddEvent}
         initialDate={addEventInitialDate}
       />
     </div>
