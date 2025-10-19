@@ -1,14 +1,46 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Calendar, Heart, Plus, Settings, LogOut, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [selectedMood, setSelectedMood] = useState<number | null>(null);
+  const [moodHistory, setMoodHistory] = useState<number[]>([60, 75, 55, 80, 70, 85, 90]);
 
   const handleLogout = () => {
     // TODO: Implement actual logout
     navigate('/');
+  };
+
+  const handleMoodSelect = (moodIndex: number) => {
+    setSelectedMood(moodIndex);
+    
+    // Update mood history (add new mood value)
+    const newMoodValue = (moodIndex + 1) * 20; // Convert 0-4 index to 20-100 scale
+    setMoodHistory([...moodHistory.slice(1), newMoodValue]);
+    
+    // Show feedback toast
+    const moodLabels = ['struggling today', 'not feeling great', 'doing okay', 'feeling good', 'feeling great'];
+    const moodEmojis = ['😢', '😕', '😐', '🙂', '😊'];
+    
+    toast({
+      title: `Mood recorded ${moodEmojis[moodIndex]}`,
+      description: `Thanks for checking in! You're ${moodLabels[moodIndex]}.`,
+    });
+
+    // TODO: Save to database when backend is connected
+  };
+
+  const handleAddEvent = () => {
+    toast({
+      title: "Add Event",
+      description: "Event creation coming soon! Connect Lovable Cloud to save events.",
+    });
+    // TODO: Open event creation modal or navigate to event form
   };
 
   return (
@@ -55,7 +87,12 @@ const Dashboard = () => {
                 {['😊', '🙂', '😐', '😕', '😢'].map((emoji, idx) => (
                   <button
                     key={idx}
-                    className="w-12 h-12 rounded-full bg-muted hover:bg-primary/10 hover:scale-110 transition-all text-2xl flex items-center justify-center"
+                    onClick={() => handleMoodSelect(idx)}
+                    className={`w-12 h-12 rounded-full transition-all text-2xl flex items-center justify-center ${
+                      selectedMood === idx 
+                        ? 'bg-primary text-primary-foreground shadow-medium scale-110' 
+                        : 'bg-muted hover:bg-primary/10 hover:scale-110'
+                    }`}
                   >
                     {emoji}
                   </button>
@@ -95,11 +132,12 @@ const Dashboard = () => {
               <h3 className="font-semibold text-lg text-card-foreground">This Week's Mood</h3>
               
               <div className="h-32 flex items-end justify-between gap-2">
-                {[60, 75, 55, 80, 70, 85, 90].map((height, idx) => (
+                {moodHistory.map((height, idx) => (
                   <div key={idx} className="flex-1 flex flex-col items-center gap-2">
                     <div 
-                      className="w-full bg-gradient-primary rounded-t-lg transition-all hover:opacity-80"
+                      className="w-full bg-gradient-primary rounded-t-lg transition-all hover:opacity-80 cursor-pointer"
                       style={{ height: `${height}%` }}
+                      title={`Mood: ${height}%`}
                     />
                     <span className="text-xs text-muted-foreground">
                       {['M', 'T', 'W', 'T', 'F', 'S', 'S'][idx]}
@@ -122,7 +160,7 @@ const Dashboard = () => {
                   <Calendar className="w-6 h-6 text-primary" />
                   <h2 className="text-2xl font-bold text-card-foreground">Today's Schedule</h2>
                 </div>
-                <Button variant="hero" size="sm">
+                <Button variant="hero" size="sm" onClick={handleAddEvent}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Event
                 </Button>
