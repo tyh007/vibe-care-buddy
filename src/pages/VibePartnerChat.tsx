@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { ArrowLeft, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { InteractiveVibePartner } from "@/components/mascot/InteractiveVibePartner";
 import { useRewardSystem } from "@/hooks/useRewardSystem";
@@ -44,7 +45,7 @@ const VibePartnerChat = () => {
         </div>
       </header>
 
-      {/* Centered partner */}
+      {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8 space-y-2">
@@ -53,6 +54,27 @@ const VibePartnerChat = () => {
               Share your feelings, get support, and receive personalized wellness guidance
             </p>
           </div>
+
+          {/* Professional Help Banner */}
+          <Card 
+            className="mb-6 p-4 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20 cursor-pointer hover:shadow-lg transition-all"
+            onClick={() => navigate('/cbt-therapist')}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Brain className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground">Need deeper support?</h3>
+                <p className="text-sm text-muted-foreground">
+                  Talk to our professional CBT therapist for evidence-based mental health guidance
+                </p>
+              </div>
+              <Button size="sm" variant="outline">
+                Start Session
+              </Button>
+            </div>
+          </Card>
 
           <InteractiveVibePartner
             points={rewardSystem.points}
