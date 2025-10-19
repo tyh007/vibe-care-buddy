@@ -26,6 +26,7 @@ const CommonRoom = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -34,17 +35,33 @@ const CommonRoom = () => {
   };
 
   useEffect(() => {
-    // Get current user
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Check authentication and get current user
+    const checkAuth = async () => {
+      setIsCheckingAuth(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session) {
         navigate('/auth');
         return;
       }
+      
       setCurrentUserId(session.user.id);
-    });
+      setIsCheckingAuth(false);
+      
+      // Load initial messages only after auth is confirmed
+      loadMessages();
+    };
 
-    // Load initial messages
-    loadMessages();
+    checkAuth();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate('/auth');
+      } else if (session) {
+        setCurrentUserId(session.user.id);
+      }
+    });
 
     // Subscribe to new messages
     const channel = supabase
@@ -63,6 +80,7 @@ const CommonRoom = () => {
       .subscribe();
 
     return () => {
+      subscription.unsubscribe();
       supabase.removeChannel(channel);
     };
   }, [navigate]);
@@ -180,6 +198,18 @@ const CommonRoom = () => {
       default: return '';
     }
   };
+
+  // Show loading state while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-forest">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-forest">
