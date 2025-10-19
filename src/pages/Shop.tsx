@@ -223,8 +223,8 @@ const Shop = () => {
 
     if (coins < item.price) {
       toast({
-        title: "Not enough coins! 💰",
-        description: `You need ${item.price - coins} more coins.`,
+        title: "Not enough stars! ⭐",
+        description: `You need ${item.price - coins} more stars.`,
         variant: "destructive",
       });
       return;
@@ -376,7 +376,7 @@ const Shop = () => {
             </p>
           </div>
           <Card className="flex items-center gap-3 px-6 py-3 bg-card/75 backdrop-blur-sm border-2 border-primary/20">
-            <span className="text-2xl">🪙</span>
+            <span className="text-2xl">⭐</span>
             <span className="text-2xl font-bold text-primary">{coins}</span>
           </Card>
         </div>
@@ -429,7 +429,7 @@ const Shop = () => {
                             </p>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-md">
-                                <span className="text-xl">🪙</span>
+                                <span className="text-xl">⭐</span>
                                 <span className="font-bold text-lg text-primary">
                                   {item.price}
                                 </span>
