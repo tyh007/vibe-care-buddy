@@ -30,6 +30,7 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  const [calendarView, setCalendarView] = useState<'day' | 'week' | 'month'>('day');
   
   // Sample mood data with dates and events (last 7 days)
   const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([
@@ -178,6 +179,20 @@ const Dashboard = () => {
     });
   };
 
+  const handleViewChange = (view: 'day' | 'week' | 'month') => {
+    setCalendarView(view);
+    const viewMessages = {
+      day: "Showing today's schedule",
+      week: "Week view - Full weekly calendar coming soon!",
+      month: "Month view - Full monthly calendar coming soon!"
+    };
+    
+    toast({
+      title: `${view.charAt(0).toUpperCase() + view.slice(1)} View`,
+      description: viewMessages[view],
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-hero">
       {/* Header */}
@@ -263,9 +278,27 @@ const Dashboard = () => {
 
             {/* View Controls */}
             <div className="flex gap-2 justify-center">
-              <Button variant="outline" size="sm">Day</Button>
-              <Button variant="outline" size="sm">Week</Button>
-              <Button variant="outline" size="sm">Month</Button>
+              <Button 
+                variant={calendarView === 'day' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => handleViewChange('day')}
+              >
+                Day
+              </Button>
+              <Button 
+                variant={calendarView === 'week' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => handleViewChange('week')}
+              >
+                Week
+              </Button>
+              <Button 
+                variant={calendarView === 'month' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => handleViewChange('month')}
+              >
+                Month
+              </Button>
             </div>
           </div>
         </div>
