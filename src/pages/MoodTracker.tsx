@@ -49,7 +49,13 @@ const MoodTracker = () => {
           .limit(20);
 
         if (data && !error) {
-          setEntries(data);
+          // If no database entries, show localStorage as fallback
+          if (data.length === 0) {
+            const savedEntries = JSON.parse(localStorage.getItem("moodEntries") || "[]");
+            setEntries(savedEntries);
+          } else {
+            setEntries(data);
+          }
         }
       } else {
         // Fallback to localStorage if not logged in
