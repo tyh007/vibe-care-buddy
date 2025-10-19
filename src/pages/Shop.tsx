@@ -181,8 +181,8 @@ const Shop = () => {
     const { data: profile } = await supabase
       .from("profiles")
       .select("coins, hair_color, hairstyle, eye_color, top, bottom, accessory")
-      .eq("id", user.id)
-      .single();
+      .eq("user_id", user.id)
+      .maybeSingle();
 
     if (profile) {
       setCoins(profile.coins || 0);
@@ -236,7 +236,7 @@ const Shop = () => {
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ coins: coins - item.price })
-        .eq("id", user.id);
+        .eq("user_id", user.id);
 
       if (updateError) throw updateError;
 
@@ -314,7 +314,7 @@ const Shop = () => {
       const { error } = await supabase
         .from("profiles")
         .update({ [updateField]: newValue })
-        .eq("id", user.id);
+        .eq("user_id", user.id);
 
       if (error) throw error;
 
