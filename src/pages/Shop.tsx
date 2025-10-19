@@ -346,102 +346,105 @@ const Shop = () => {
   }, {} as Record<string, InventoryItem[]>);
 
   return (
-    <div className="min-h-screen bg-forest">
+    <div className="min-h-screen bg-gradient-hero">
       {/* Header with Back Button */}
-      <div className="sticky top-0 z-50 bg-card/75 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/dashboard')}
-              className="gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Button>
-            <div className="flex items-center gap-2">
-              <Heart className="w-5 h-5 text-primary" />
-              <h1 className="text-2xl font-bold text-foreground">Avatar Shop</h1>
+      <div className="sticky top-0 z-50 glass border-b border-border/50 shadow-soft">
+        <div className="container mx-auto px-6 py-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/dashboard')}
+                className="gap-2 hover:bg-primary/10"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </Button>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-medium">
+                  <Heart className="w-5 h-5 text-white" />
+                </div>
+                <h1 className="text-3xl font-display font-bold gradient-text">Avatar Shop</h1>
+              </div>
             </div>
+            <Card className="flex items-center gap-3 px-6 py-3 glass border-2 border-primary/20 animate-glow-pulse">
+              <span className="text-3xl drop-shadow-lg">⭐</span>
+              <span className="text-3xl font-display font-bold text-primary">{coins}</span>
+            </Card>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8 space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-lg text-muted-foreground animate-fade-in">
-              Customize your character and express yourself! 
-            </p>
-          </div>
-          <Card className="flex items-center gap-3 px-6 py-3 bg-card/75 backdrop-blur-sm border-2 border-primary/20 hover-lift transition-all animate-glow-pulse">
-            <span className="text-2xl">⭐</span>
-            <span className="text-2xl font-bold text-primary">{coins}</span>
-          </Card>
+      <div className="container mx-auto px-6 py-10 space-y-8">
+        <div className="text-center max-w-2xl mx-auto animate-fade-in">
+          <p className="text-xl text-muted-foreground">
+            ✨ Customize your character and express yourself! ✨
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1 sticky top-8 h-fit">
-            <PixelAvatar size="large" showCoins={false} />
+          <div className="lg:col-span-1 sticky top-24 h-fit">
+            <Card className="glass border-2 border-primary/20 p-6 hover-lift">
+              <PixelAvatar size="large" showCoins={false} />
+            </Card>
           </div>
 
           <div className="lg:col-span-2">
             <Tabs defaultValue="shop" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6 h-12">
-                <TabsTrigger value="shop" className="text-base font-semibold">
+              <TabsList className="grid w-full grid-cols-2 mb-8 h-14 p-1 glass shadow-medium">
+                <TabsTrigger value="shop" className="text-lg font-display font-bold data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-medium rounded-lg">
                   🛍️ Shop
                 </TabsTrigger>
-                <TabsTrigger value="dressup" className="text-base font-semibold">
+                <TabsTrigger value="dressup" className="text-lg font-display font-bold data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-medium rounded-lg">
                   ✨ Wardrobe
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="shop" className="space-y-6">
+              <TabsContent value="shop" className="space-y-8">
                 {Object.entries(groupedItems).map(([category, categoryItems]) => (
-                  <div key={category}>
-                    <div className="flex items-center gap-3 mb-4 px-4 py-2 bg-card/50 rounded-lg border border-border">
-                      <span className="text-2xl">{categoryIcons[category as keyof typeof categoryIcons]}</span>
-                      <h2 className="text-xl font-semibold capitalize text-foreground">
+                  <div key={category} className="animate-slide-up">
+                    <div className="flex items-center gap-3 mb-6 px-6 py-4 glass rounded-xl border-2 border-border/50 shadow-medium">
+                      <span className="text-3xl drop-shadow-lg">{categoryIcons[category as keyof typeof categoryIcons]}</span>
+                      <h2 className="text-2xl font-display font-bold capitalize gradient-text">
                         {category.replace('_', ' ')}
                       </h2>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       {categoryItems.map((item) => {
                         const owned = inventory.includes(item.id);
                         return (
                           <Card 
                             key={item.id} 
-                            className={`p-6 flex flex-col hover:shadow-lg transition-all hover-lift animate-fade-in bg-card/75 backdrop-blur-sm ${
+                            className={`p-6 flex flex-col hover-lift hover-glow transition-all animate-fade-in glass ${
                               owned 
-                                ? 'border-2 border-primary' 
-                                : 'border border-border'
+                                ? 'border-2 border-primary shadow-glow' 
+                                : 'border-2 border-border/50'
                             }`}
                           >
-                            <div className="mb-4 flex justify-center">
+                            <div className="mb-5 flex justify-center relative">
+                              <div className="absolute inset-0 bg-gradient-primary opacity-10 blur-xl rounded-full"></div>
                               <ItemIcon icon={item.icon} category={item.category} />
                             </div>
-                            <h3 className="font-semibold text-lg mb-2 text-foreground">
+                            <h3 className="font-display font-bold text-xl mb-2 text-foreground">
                               {item.name}
                             </h3>
-                            <p className="text-sm text-muted-foreground mb-4 flex-1">
+                            <p className="text-sm text-muted-foreground mb-5 flex-1 leading-relaxed">
                               {item.description}
                             </p>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-md">
-                                <span className="text-xl">⭐</span>
-                                <span className="font-bold text-lg text-primary">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-primary/10 rounded-lg border border-primary/20 shadow-soft">
+                                <span className="text-2xl drop-shadow-lg">⭐</span>
+                                <span className="font-display font-bold text-xl text-primary">
                                   {item.price}
                                 </span>
                               </div>
                               <Button
                                 onClick={() => handlePurchase(item)}
                                 disabled={owned || loading === item.id || item.price === 0}
-                                size="sm"
                                 variant={owned ? "secondary" : "default"}
-                                className="transition-all hover:scale-105"
                               >
-                                {owned ? "✓ Owned" : loading === item.id ? "Buying..." : item.price === 0 ? "Free!" : "Buy"}
+                                {owned ? "✓ Owned" : loading === item.id ? "Buying..." : item.price === 0 ? "Free!" : "Buy Now"}
                               </Button>
                             </div>
                           </Card>
