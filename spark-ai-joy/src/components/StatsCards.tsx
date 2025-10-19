@@ -59,19 +59,21 @@ export const StatsCards = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
       {cards.map((card, index) => (
         <Card
           key={card.title}
-          className="p-6 animate-fade-in hover-scale cursor-pointer"
+          className="glass border border-border/50 p-6 animate-fade-in hover-lift cursor-pointer transition-all"
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">{card.title}</p>
-              <p className="text-3xl font-bold">{card.value}</p>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${card.color.replace('text-', 'bg-')}/10`}>
+                <card.icon className={`w-5 h-5 ${card.color}`} />
+              </div>
+              <p className="text-3xl font-bold gradient-text">{card.value}</p>
             </div>
-            <card.icon className={`w-8 h-8 ${card.color}`} />
+            <p className="text-sm font-medium text-muted-foreground">{card.title}</p>
           </div>
         </Card>
       ))}

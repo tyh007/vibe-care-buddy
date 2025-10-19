@@ -63,7 +63,7 @@ export const StatsCards = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
       {cards.map((card, index) => (
         <Card
           key={card.title}
@@ -71,13 +71,13 @@ export const StatsCards = () => {
           style={{ animationDelay: `${index * 100}ms` }}
         >
           <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
-          <div className="relative flex flex-col gap-4">
-            <div className={`w-12 h-12 rounded-xl ${card.iconBg} flex items-center justify-center`}>
-              <card.icon className={`w-6 h-6 bg-gradient-to-br ${card.gradient} bg-clip-text text-transparent`} style={{ WebkitTextFillColor: 'transparent' }} />
+          <div className="relative flex items-center gap-4">
+            <div className={`w-14 h-14 rounded-xl ${card.iconBg} flex items-center justify-center flex-shrink-0`}>
+              <card.icon className={`w-7 h-7 bg-gradient-to-br ${card.gradient} bg-clip-text text-transparent`} style={{ WebkitTextFillColor: 'transparent' }} />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <p className="text-sm text-muted-foreground font-medium mb-1">{card.title}</p>
-              <p className="text-3xl font-display font-bold text-foreground">{card.value}</p>
+              <p className="text-3xl font-display font-bold text-foreground truncate">{card.value}</p>
             </div>
           </div>
         </Card>
