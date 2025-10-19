@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Calendar, Heart, Settings, LogOut } from "lucide-react";
+import { Calendar, Heart, Settings, LogOut, CalendarDays, LayoutGrid } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { MoodTimeline } from "@/components/MoodTimeline";
 import { AddEventDialog } from "@/components/AddEventDialog";
 import { SuggestionEngine } from "@/components/SuggestionEngine";
-import { CalendarDropZone } from "@/components/CalendarDropZone";
-import { format, subDays } from "date-fns";
+import { CalendarWeekView } from "@/components/calendar/CalendarWeekView";
+import { CalendarMonthView } from "@/components/calendar/CalendarMonthView";
+import { NotesEditorSidebar } from "@/components/calendar/NotesEditorSidebar";
+import { format, subDays, parseISO } from "date-fns";
 
 interface MoodEntry {
   date: string;
@@ -23,6 +25,7 @@ interface CalendarEvent {
   end: string;
   category: string;
   notes?: string;
+  color?: string;
 }
 
 const Dashboard = () => {
@@ -30,7 +33,10 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
-  const [calendarView, setCalendarView] = useState<'day' | 'week' | 'month'>('day');
+  const [calendarView, setCalendarView] = useState<'day' | 'week' | 'month'>('week');
+  const [calendarDate, setCalendarDate] = useState(new Date());
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [isNotesOpen, setIsNotesOpen] = useState(false);
   
   // Sample mood data with dates and events (last 7 days)
   const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([
@@ -43,7 +49,7 @@ const Dashboard = () => {
     { date: format(new Date(), 'yyyy-MM-dd'), mood: 5, events: ['Morning Walk', 'Productive Study Session'] },
   ]);
 
-  // Calendar events
+  // Calendar events with ISO timestamps for week view
   const [events, setEvents] = useState<CalendarEvent[]>([
     {
       id: '1',
@@ -51,7 +57,8 @@ const Dashboard = () => {
       start: '09:00',
       end: '10:00',
       category: 'class',
-      notes: 'Review chapters 3-4'
+      notes: 'Review chapters 3-4',
+      color: '#8b5cf6'
     },
     {
       id: '2',
@@ -59,7 +66,8 @@ const Dashboard = () => {
       start: '11:00',
       end: '13:00',
       category: 'study',
-      notes: 'Bring practice problems'
+      notes: 'Bring practice problems',
+      color: '#ec4899'
     },
     {
       id: '3',
@@ -67,6 +75,16 @@ const Dashboard = () => {
       start: '15:30',
       end: '17:00',
       category: 'class',
+      color: '#8b5cf6'
+    },
+    {
+      id: '4',
+      title: 'Yoga Class',
+      start: '18:00',
+      end: '19:00',
+      category: 'wellness',
+      notes: 'Bring yoga mat',
+      color: '#10b981'
     }
   ]);
 
@@ -181,15 +199,31 @@ const Dashboard = () => {
 
   const handleViewChange = (view: 'day' | 'week' | 'month') => {
     setCalendarView(view);
-    const viewMessages = {
-      day: "Showing today's schedule",
-      week: "Week view - Full weekly calendar coming soon!",
-      month: "Month view - Full monthly calendar coming soon!"
-    };
+  };
+  
+  const handleEventClick = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setIsNotesOpen(true);
+  };
+  
+  const handleTimeSlotClick = (date: Date, time: string) => {
+    // Open add event dialog with pre-filled time
+    setIsAddEventOpen(true);
+  };
+  
+  const handleDateClick = (date: Date) => {
+    setCalendarDate(date);
+    setCalendarView('week');
+  };
+  
+  const handleSaveNotes = (eventId: string, notes: string) => {
+    setEvents(events.map(e => 
+      e.id === eventId ? { ...e, notes } : e
+    ));
     
     toast({
-      title: `${view.charAt(0).toUpperCase() + view.slice(1)} View`,
-      description: viewMessages[view],
+      title: "Notes Saved! 📝",
+      description: "Your notes have been saved successfully.",
     });
   };
 
@@ -262,47 +296,87 @@ const Dashboard = () => {
             <MoodTimeline data={moodHistory} />
           </div>
 
-          {/* Right Column: Calendar with Drop Zones */}
+          {/* Right Column: Calendar Views */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="flex justify-end mb-4">
+            {/* View controls */}
+            <div className="flex justify-between items-center">
+              <div className="flex gap-2">
+                <Button
+                  variant={calendarView === 'week' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleViewChange('week')}
+                >
+                  <CalendarDays className="w-4 h-4 mr-2" />
+                  Week
+                </Button>
+                <Button
+                  variant={calendarView === 'month' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleViewChange('month')}
+                >
+                  <LayoutGrid className="w-4 h-4 mr-2" />
+                  Month
+                </Button>
+              </div>
               <Button variant="hero" size="sm" onClick={handleAddEvent}>
                 <Calendar className="w-4 h-4 mr-2" />
                 Add Event
               </Button>
             </div>
-            
-            <CalendarDropZone 
-              events={events}
-              onDropSuggestion={handleDropSuggestion}
-            />
 
-            {/* View Controls */}
-            <div className="flex gap-2 justify-center">
-              <Button 
-                variant={calendarView === 'day' ? 'default' : 'outline'} 
-                size="sm"
-                onClick={() => handleViewChange('day')}
-              >
-                Day
-              </Button>
-              <Button 
-                variant={calendarView === 'week' ? 'default' : 'outline'} 
-                size="sm"
-                onClick={() => handleViewChange('week')}
-              >
-                Week
-              </Button>
-              <Button 
-                variant={calendarView === 'month' ? 'default' : 'outline'} 
-                size="sm"
-                onClick={() => handleViewChange('month')}
-              >
-                Month
-              </Button>
-            </div>
+            {/* Calendar view */}
+            {calendarView === 'week' ? (
+              <CalendarWeekView
+                events={events}
+                moods={moodHistory}
+                currentDate={calendarDate}
+                onDateChange={setCalendarDate}
+                onEventClick={handleEventClick}
+                onTimeSlotClick={handleTimeSlotClick}
+              />
+            ) : (
+              <CalendarMonthView
+                events={events}
+                moods={moodHistory}
+                currentDate={calendarDate}
+                onDateChange={setCalendarDate}
+                onDateClick={handleDateClick}
+              />
+            )}
+
+            {/* Course legend */}
+            <Card className="p-4 bg-card/50">
+              <h4 className="font-semibold text-sm mb-3">Course Legend</h4>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded" style={{ backgroundColor: '#8b5cf6' }} />
+                  <span>Class</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded" style={{ backgroundColor: '#ec4899' }} />
+                  <span>Study</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded" style={{ backgroundColor: '#10b981' }} />
+                  <span>Wellness</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded" style={{ backgroundColor: '#f59e0b' }} />
+                  <span>Social</span>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
       </div>
+
+      {/* Notes Editor Sidebar */}
+      <NotesEditorSidebar
+        event={selectedEvent}
+        isOpen={isNotesOpen}
+        onClose={() => setIsNotesOpen(false)}
+        onSave={handleSaveNotes}
+      />
 
       {/* Add Event Dialog */}
       <AddEventDialog
