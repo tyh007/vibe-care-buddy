@@ -391,26 +391,6 @@ const Dashboard = () => {
                         </Button>
                       </div>
                     </div>
-
-                    {/* Mini Vibe Partner */}
-                    <div className="pt-4 border-t border-border">
-                      <button
-                        onClick={() => navigate('/vibe-partner')}
-                        className="w-full hover:opacity-80 transition-opacity"
-                      >
-                        <VibePartner
-                          points={rewardSystem.points}
-                          level={rewardSystem.level}
-                          name={partnerName}
-                          type={partnerType}
-                          mood={moodHistory[moodHistory.length - 1]?.mood}
-                          onCustomize={() => {
-                            setPartnerName(localStorage.getItem('vibePartnerName') || 'Vibe Buddy');
-                            setPartnerType((localStorage.getItem('vibePartnerType') as 'cat' | 'dog' | 'panda') || 'cat');
-                          }}
-                        />
-                      </button>
-                    </div>
                   </div>
                 </div>
               </aside>
@@ -422,6 +402,24 @@ const Dashboard = () => {
             <ResizablePanel defaultSize={50} minSize={40}>
               <div className="h-full overflow-y-auto">
                 <div className="p-6 space-y-6">
+                  {/* Vibe Partner */}
+                  <button
+                    onClick={() => navigate('/vibe-partner')}
+                    className="w-full hover:opacity-80 transition-opacity"
+                  >
+                    <VibePartner
+                      points={rewardSystem.points}
+                      level={rewardSystem.level}
+                      name={partnerName}
+                      type={partnerType}
+                      mood={moodHistory[moodHistory.length - 1]?.mood}
+                      onCustomize={() => {
+                        setPartnerName(localStorage.getItem('vibePartnerName') || 'Vibe Buddy');
+                        setPartnerType((localStorage.getItem('vibePartnerType') as 'cat' | 'dog' | 'panda') || 'cat');
+                      }}
+                    />
+                  </button>
+
                   {/* Mood Check */}
                   <Card className="p-4 bg-card/80 backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-3">
@@ -532,6 +530,24 @@ const Dashboard = () => {
         {/* Mobile: Original Layout */}
         <main className="flex-1 lg:hidden overflow-y-auto">
           <div className="p-4 space-y-6">
+            {/* Vibe Partner */}
+            <button
+              onClick={() => navigate('/vibe-partner')}
+              className="w-full hover:opacity-80 transition-opacity"
+            >
+              <VibePartner
+                points={rewardSystem.points}
+                level={rewardSystem.level}
+                name={partnerName}
+                type={partnerType}
+                mood={moodHistory[moodHistory.length - 1]?.mood}
+                onCustomize={() => {
+                  setPartnerName(localStorage.getItem('vibePartnerName') || 'Vibe Buddy');
+                  setPartnerType((localStorage.getItem('vibePartnerType') as 'cat' | 'dog' | 'panda') || 'cat');
+                }}
+              />
+            </button>
+
             {/* Mood Check */}
             <Card className="p-4 bg-card/80 backdrop-blur-sm">
               <div className="flex items-center justify-between mb-3">
