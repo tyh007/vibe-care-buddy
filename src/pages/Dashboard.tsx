@@ -13,6 +13,7 @@ import { NotesEditorSidebar } from "@/components/calendar/NotesEditorSidebar";
 import { VibePartner } from "@/components/mascot/VibePartner";
 import { useRewardSystem } from "@/hooks/useRewardSystem";
 import { format, subDays, parseISO } from "date-fns";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 interface MoodEntry {
   date: string;
@@ -241,94 +242,7 @@ const Dashboard = () => {
     : events.filter(e => e.category === selectedCategory);
 
   return (
-    <div className="min-h-screen flex w-full bg-gradient-hero">
-      {/* Left Sidebar - Desktop */}
-      <aside className="hidden lg:flex w-64 flex-col border-r border-border bg-card/80 backdrop-blur-sm">
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-6">
-            {/* Header */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Heart className="w-6 h-6 text-primary" />
-                <span className="font-bold text-xl text-foreground">VibeCare</span>
-              </div>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground">
-                <LogOut className="w-4 h-4" />
-                Sign Out
-              </Button>
-            </div>
-
-            {/* Categories */}
-            <div>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3 px-2">Categories</h3>
-              <div className="space-y-1">
-                {categories.map((cat) => (
-                  <Button
-                    key={cat.id}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`w-full justify-start gap-3 ${
-                      selectedCategory === cat.id 
-                        ? 'bg-primary/10 text-primary font-medium' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                    }`}
-                  >
-                    <cat.icon className="w-4 h-4" />
-                    <span>{cat.name}</span>
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3 px-2">Quick Access</h3>
-              <div className="space-y-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/vibe-partner')}
-                  className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-                >
-                  <Heart className="w-4 h-4" />
-                  Vibe Partner
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/cbt-therapist')}
-                  className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-                >
-                  <Brain className="w-4 h-4" />
-                  CBT Therapist
-                </Button>
-              </div>
-            </div>
-
-            {/* Mini Vibe Partner */}
-            <div className="pt-4 border-t border-border">
-              <button
-                onClick={() => navigate('/vibe-partner')}
-                className="w-full hover:opacity-80 transition-opacity"
-              >
-                <VibePartner
-                  points={rewardSystem.points}
-                  level={rewardSystem.level}
-                  name={partnerName}
-                  type={partnerType}
-                  mood={moodHistory[moodHistory.length - 1]?.mood}
-                  onCustomize={() => {
-                    setPartnerName(localStorage.getItem('vibePartnerName') || 'Vibe Buddy');
-                    setPartnerType((localStorage.getItem('vibePartnerType') as 'cat' | 'dog' | 'panda') || 'cat');
-                  }}
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-      </aside>
-
+    <div className="min-h-screen flex flex-col w-full bg-gradient-hero">
       {/* Mobile Header with Hamburger */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between p-4">
@@ -408,11 +322,216 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden pt-16 lg:pt-0">
-        {/* Central Calendar View (70%) */}
-        <div className="flex-1 lg:w-[70%] overflow-y-auto">
-          <div className="p-4 lg:p-6 space-y-6">
+      {/* Main Content Area with Resizable Panels */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden pt-16 lg:pt-0">
+        {/* Desktop: Resizable Layout */}
+        <div className="hidden lg:flex flex-1">
+          <ResizablePanelGroup direction="horizontal">
+            {/* Left Sidebar Panel */}
+            <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+              <aside className="h-full flex flex-col border-r border-border bg-card/80 backdrop-blur-sm overflow-hidden">
+                <div className="flex-1 overflow-y-auto">
+                  <div className="p-6 space-y-6">
+                    {/* Header */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <Heart className="w-6 h-6 text-primary" />
+                        <span className="font-bold text-xl text-foreground">VibeCare</span>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground">
+                        <LogOut className="w-4 h-4" />
+                        Sign Out
+                      </Button>
+                    </div>
+
+                    {/* Categories */}
+                    <div>
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3 px-2">Categories</h3>
+                      <div className="space-y-1">
+                        {categories.map((cat) => (
+                          <Button
+                            key={cat.id}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedCategory(cat.id)}
+                            className={`w-full justify-start gap-3 ${
+                              selectedCategory === cat.id 
+                                ? 'bg-primary/10 text-primary font-medium' 
+                                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                            }`}
+                          >
+                            <cat.icon className="w-4 h-4" />
+                            <span>{cat.name}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div>
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3 px-2">Quick Access</h3>
+                      <div className="space-y-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate('/vibe-partner')}
+                          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+                        >
+                          <Heart className="w-4 h-4" />
+                          Vibe Partner
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate('/cbt-therapist')}
+                          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+                        >
+                          <Brain className="w-4 h-4" />
+                          CBT Therapist
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Mini Vibe Partner */}
+                    <div className="pt-4 border-t border-border">
+                      <button
+                        onClick={() => navigate('/vibe-partner')}
+                        className="w-full hover:opacity-80 transition-opacity"
+                      >
+                        <VibePartner
+                          points={rewardSystem.points}
+                          level={rewardSystem.level}
+                          name={partnerName}
+                          type={partnerType}
+                          mood={moodHistory[moodHistory.length - 1]?.mood}
+                          onCustomize={() => {
+                            setPartnerName(localStorage.getItem('vibePartnerName') || 'Vibe Buddy');
+                            setPartnerType((localStorage.getItem('vibePartnerType') as 'cat' | 'dog' | 'panda') || 'cat');
+                          }}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </aside>
+            </ResizablePanel>
+
+            <ResizableHandle withHandle />
+
+            {/* Central Calendar Panel */}
+            <ResizablePanel defaultSize={50} minSize={40}>
+              <div className="h-full overflow-y-auto">
+                <div className="p-6 space-y-6">
+                  {/* Mood Check */}
+                  <Card className="p-4 bg-card/80 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-foreground">Quick Mood Check</h3>
+                      <Heart className="w-5 h-5 text-secondary" />
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      {['😢', '😕', '😐', '🙂', '😊'].map((emoji, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleMoodSelect(idx)}
+                          className={`w-12 h-12 rounded-full transition-all text-2xl flex items-center justify-center ${
+                            selectedMood === idx 
+                              ? 'bg-primary text-primary-foreground shadow-lg scale-110' 
+                              : 'bg-muted hover:bg-primary/10 hover:scale-105'
+                          }`}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center mt-2">How are you feeling right now?</p>
+                  </Card>
+
+                  {/* Calendar Controls */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="flex gap-2">
+                      <Button
+                        variant={calendarView === 'week' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleViewChange('week')}
+                      >
+                        <CalendarDays className="w-4 h-4 mr-2" />
+                        Week
+                      </Button>
+                      <Button
+                        variant={calendarView === 'month' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleViewChange('month')}
+                      >
+                        <LayoutGrid className="w-4 h-4 mr-2" />
+                        Month
+                      </Button>
+                    </div>
+                    <Button variant="default" size="sm" onClick={() => setIsAddEventOpen(true)}>
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Add Event
+                    </Button>
+                  </div>
+
+                  {/* Calendar View */}
+                  {calendarView === 'week' ? (
+                    <CalendarWeekView
+                      events={filteredEvents}
+                      moods={moodHistory}
+                      currentDate={calendarDate}
+                      onDateChange={setCalendarDate}
+                      onEventClick={handleEventClick}
+                      onTimeSlotClick={handleTimeSlotClick}
+                    />
+                  ) : (
+                    <CalendarMonthView
+                      events={filteredEvents}
+                      moods={moodHistory}
+                      currentDate={calendarDate}
+                      onDateChange={setCalendarDate}
+                      onDateClick={handleDateClick}
+                    />
+                  )}
+
+                  {/* Mood Timeline */}
+                  <MoodTimeline data={moodHistory} />
+
+                  {/* Suggestion Engine */}
+                  <SuggestionEngine 
+                    events={filteredEvents}
+                    onAcceptSuggestion={handleAcceptSuggestion}
+                  />
+                </div>
+              </div>
+            </ResizablePanel>
+
+            <ResizableHandle withHandle />
+
+            {/* Right Context Panel */}
+            <ResizablePanel defaultSize={30} minSize={25} maxSize={40}>
+              <aside className="h-full border-l border-border bg-card/80 backdrop-blur-sm overflow-y-auto">
+                <NotesEditorSidebar
+                  event={selectedEvent}
+                  isOpen={isNotesOpen || !!selectedEvent}
+                  onClose={() => {
+                    setIsNotesOpen(false);
+                    setSelectedEvent(null);
+                  }}
+                  onSave={handleSaveNotes}
+                  onUpdate={(eventId: string, updates: Partial<CalendarEvent>) => {
+                    setEvents(prev => prev.map(e => 
+                      e.id === eventId ? { ...e, ...updates } : e
+                    ));
+                  }}
+                  onDelete={handleDeleteEvent}
+                />
+              </aside>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
+
+        {/* Mobile: Original Layout */}
+        <main className="flex-1 lg:hidden overflow-y-auto">
+          <div className="p-4 space-y-6">
             {/* Mood Check */}
             <Card className="p-4 bg-card/80 backdrop-blur-sm">
               <div className="flex items-center justify-between mb-3">
@@ -482,44 +601,30 @@ const Dashboard = () => {
                 onDateClick={handleDateClick}
               />
             )}
+          </div>
 
-            {/* Mood Timeline - Desktop Only */}
-            <div className="hidden lg:block">
-              <MoodTimeline data={moodHistory} />
-            </div>
-
-            {/* Suggestion Engine - Desktop Only */}
-            <div className="hidden lg:block">
-              <SuggestionEngine 
-                events={filteredEvents}
-                onAcceptSuggestion={handleAcceptSuggestion}
+          {/* Mobile Notes Overlay */}
+          {(selectedEvent || isNotesOpen) && (
+            <div className="fixed inset-0 z-40 bg-card/95 backdrop-blur-sm">
+              <NotesEditorSidebar
+                event={selectedEvent}
+                isOpen={true}
+                onClose={() => {
+                  setIsNotesOpen(false);
+                  setSelectedEvent(null);
+                }}
+                onSave={handleSaveNotes}
+                onUpdate={(eventId: string, updates: Partial<CalendarEvent>) => {
+                  setEvents(prev => prev.map(e => 
+                    e.id === eventId ? { ...e, ...updates } : e
+                  ));
+                }}
+                onDelete={handleDeleteEvent}
               />
             </div>
-          </div>
-        </div>
-
-        {/* Right Context Panel (30%) - Desktop, overlay on mobile */}
-        <aside className={`
-          ${selectedEvent || isNotesOpen ? 'fixed inset-0 z-40 lg:relative lg:inset-auto' : 'hidden'}
-          lg:block lg:w-[30%] border-l border-border bg-card/95 lg:bg-card/80 backdrop-blur-sm overflow-y-auto
-        `}>
-          <NotesEditorSidebar
-            event={selectedEvent}
-            isOpen={isNotesOpen || !!selectedEvent}
-            onClose={() => {
-              setIsNotesOpen(false);
-              setSelectedEvent(null);
-            }}
-            onSave={handleSaveNotes}
-            onUpdate={(eventId: string, updates: Partial<CalendarEvent>) => {
-              setEvents(prev => prev.map(e => 
-                e.id === eventId ? { ...e, ...updates } : e
-              ));
-            }}
-            onDelete={handleDeleteEvent}
-          />
-        </aside>
-      </main>
+          )}
+        </main>
+      </div>
 
       {/* Dialogs */}
       <AddEventDialog
