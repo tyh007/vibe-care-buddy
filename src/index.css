@@ -126,4 +126,26 @@ All colors MUST be HSL.
     background-position: center;
     background-attachment: fixed;
   }
+
+  /* Smooth page transitions */
+  .page-transition {
+    animation: fade-in-scale 0.3s ease-out;
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  /* Hover lift effect */
+  .hover-lift {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
 }

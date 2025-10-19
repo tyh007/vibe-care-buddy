@@ -375,7 +375,7 @@ const Shop = () => {
               Customize your character and express yourself! 
             </p>
           </div>
-          <Card className="flex items-center gap-3 px-6 py-3 bg-card/75 backdrop-blur-sm border-2 border-primary/20">
+          <Card className="flex items-center gap-3 px-6 py-3 bg-card/75 backdrop-blur-sm border-2 border-primary/20 hover-lift transition-all animate-glow-pulse">
             <span className="text-2xl">⭐</span>
             <span className="text-2xl font-bold text-primary">{coins}</span>
           </Card>
@@ -412,7 +412,7 @@ const Shop = () => {
                         return (
                           <Card 
                             key={item.id} 
-                            className={`p-6 flex flex-col hover:shadow-lg transition-all bg-card/75 backdrop-blur-sm ${
+                            className={`p-6 flex flex-col hover:shadow-lg transition-all hover-lift animate-fade-in bg-card/75 backdrop-blur-sm ${
                               owned 
                                 ? 'border-2 border-primary' 
                                 : 'border border-border'
@@ -439,6 +439,7 @@ const Shop = () => {
                                 disabled={owned || loading === item.id || item.price === 0}
                                 size="sm"
                                 variant={owned ? "secondary" : "default"}
+                                className="transition-all hover:scale-105"
                               >
                                 {owned ? "✓ Owned" : loading === item.id ? "Buying..." : item.price === 0 ? "Free!" : "Buy"}
                               </Button>
@@ -454,7 +455,7 @@ const Shop = () => {
               <TabsContent value="dressup" className="space-y-6">
                 {Object.keys(groupedInventory).length === 0 ? (
                   <Card 
-                    className="p-16 text-center border-4 border-amber-900/20 bg-gradient-to-br from-white to-amber-50 dark:from-gray-800 dark:to-amber-950"
+                    className="p-16 text-center border-4 border-amber-900/20 bg-gradient-to-br from-white to-amber-50 dark:from-gray-800 dark:to-amber-950 animate-fade-in"
                     style={{ boxShadow: '0 4px 0 rgba(139, 69, 19, 0.2), 0 8px 12px rgba(0,0,0,0.1)' }}
                   >
                     <div className="text-7xl mb-6 drop-shadow-lg">🛍️</div>
@@ -490,7 +491,7 @@ const Shop = () => {
                             return (
                               <Card 
                                 key={item.id} 
-                                className={`p-6 flex flex-col transition-all border-4 ${
+                                className={`p-6 flex flex-col transition-all hover-lift animate-slide-in-right border-4 ${
                                   item.isEquipped 
                                     ? 'border-green-600 dark:border-green-400 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 shadow-2xl' 
                                     : 'border-amber-900/20 bg-gradient-to-br from-white to-amber-50 dark:from-gray-800 dark:to-amber-950 hover:shadow-xl'
@@ -515,7 +516,7 @@ const Shop = () => {
                                   onClick={() => handleEquip(item)}
                                   size="lg"
                                   variant={item.isEquipped ? "secondary" : "default"}
-                                  className="w-full font-bold"
+                                  className="w-full font-bold transition-all hover:scale-105"
                                   style={{ 
                                     fontFamily: 'monospace',
                                     boxShadow: '0 3px 0 rgba(0, 0, 0, 0.2)'

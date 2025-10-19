@@ -17,15 +17,15 @@ const Index = () => {
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Hero Content */}
-            <div className="space-y-8 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 shadow-soft">
+            <div className="space-y-8 text-center lg:text-left animate-fade-in">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 shadow-soft animate-slide-in-right">
                 <Sparkles className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium text-primary">Your Personal Wellness Partner</span>
               </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
                 Balance your schedule,{" "}
-                <span className="bg-gradient-primary bg-clip-text text-transparent">
+                <span className="bg-gradient-primary bg-clip-text text-transparent animate-glow-pulse">
                   nurture your mind
                 </span>
               </h1>
@@ -39,7 +39,7 @@ const Index = () => {
                   size="xl" 
                   variant="hero"
                   onClick={() => navigate('/auth')}
-                  className="group"
+                  className="group transition-all hover:scale-105 hover:shadow-glow"
                 >
                   Get Started Free
                   <Sparkles className="ml-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
@@ -48,6 +48,7 @@ const Index = () => {
                   size="xl" 
                   variant="outline"
                   onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="transition-all hover:scale-105"
                 >
                   Learn More
                 </Button>
@@ -66,8 +67,8 @@ const Index = () => {
             </div>
             
             {/* Right: Hero Image */}
-            <div className="relative">
-              <div className="relative rounded-2xl overflow-hidden shadow-medium">
+            <div className="relative animate-slide-up">
+              <div className="relative rounded-2xl overflow-hidden shadow-medium hover-lift transition-all">
                 <img 
                   src={heroImage} 
                   alt="Student peacefully organizing their day" 
@@ -75,8 +76,8 @@ const Index = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent" />
               </div>
-              <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
-              <div className="absolute -top-6 -left-6 w-32 h-32 bg-secondary/10 rounded-full blur-3xl" />
+              <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-primary/10 rounded-full blur-3xl animate-glow-pulse" />
+              <div className="absolute -top-6 -left-6 w-32 h-32 bg-secondary/10 rounded-full blur-3xl animate-glow-pulse" />
             </div>
           </div>
         </div>
@@ -96,7 +97,7 @@ const Index = () => {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Feature 1: Calendar-First Planning */}
-            <Card className="p-6 space-y-4 hover:shadow-medium transition-shadow bg-card border-border">
+            <Card className="p-6 space-y-4 hover:shadow-medium transition-all hover-lift animate-fade-in bg-card border-border">
               <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
                 <img src={calendarIcon} alt="Calendar" className="w-10 h-10" />
               </div>
@@ -107,7 +108,7 @@ const Index = () => {
             </Card>
 
             {/* Feature 2: Mood Tracking */}
-            <Card className="p-6 space-y-4 hover:shadow-medium transition-shadow bg-card border-border">
+            <Card className="p-6 space-y-4 hover:shadow-medium transition-all hover-lift animate-fade-in bg-card border-border" style={{ animationDelay: '0.1s' }}>
               <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center">
                 <img src={moodIcon} alt="Mood tracking" className="w-10 h-10" />
               </div>
@@ -118,7 +119,7 @@ const Index = () => {
             </Card>
 
             {/* Feature 3: Smart Suggestions */}
-            <Card className="p-6 space-y-4 hover:shadow-medium transition-shadow bg-card border-border">
+            <Card className="p-6 space-y-4 hover:shadow-medium transition-all hover-lift animate-fade-in bg-card border-border" style={{ animationDelay: '0.2s' }}>
               <div className="w-16 h-16 rounded-2xl bg-success/10 flex items-center justify-center">
                 <Sparkles className="w-10 h-10 text-success" />
               </div>
@@ -129,7 +130,7 @@ const Index = () => {
             </Card>
 
             {/* Feature 4: Privacy First */}
-            <Card className="p-6 space-y-4 hover:shadow-medium transition-shadow bg-card border-border">
+            <Card className="p-6 space-y-4 hover:shadow-medium transition-all hover-lift animate-fade-in bg-card border-border" style={{ animationDelay: '0.3s' }}>
               <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
                 <img src={privacyIcon} alt="Privacy" className="w-10 h-10" />
               </div>
@@ -140,7 +141,7 @@ const Index = () => {
             </Card>
 
             {/* Feature 5: Unified Exports */}
-            <Card className="p-6 space-y-4 hover:shadow-medium transition-shadow bg-card border-border">
+            <Card className="p-6 space-y-4 hover:shadow-medium transition-all hover-lift animate-fade-in bg-card border-border" style={{ animationDelay: '0.4s' }}>
               <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center">
                 <BookOpen className="w-10 h-10 text-accent" />
               </div>
