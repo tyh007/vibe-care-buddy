@@ -5,6 +5,7 @@ import { Calendar, Heart, Plus, Settings, LogOut, Sparkles } from "lucide-react"
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { MoodTimeline } from "@/components/MoodTimeline";
+import { AddEventDialog } from "@/components/AddEventDialog";
 import { format, subDays } from "date-fns";
 
 interface MoodEntry {
@@ -13,10 +14,20 @@ interface MoodEntry {
   events: string[];
 }
 
+interface CalendarEvent {
+  id: string;
+  title: string;
+  start: string;
+  end: string;
+  category: string;
+  notes?: string;
+}
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
+  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   
   // Sample mood data with dates and events (last 7 days)
   const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([
@@ -27,6 +38,33 @@ const Dashboard = () => {
     { date: format(subDays(new Date(), 2), 'yyyy-MM-dd'), mood: 4, events: ['Group Project', 'Yoga Class'] },
     { date: format(subDays(new Date(), 1), 'yyyy-MM-dd'), mood: 5, events: ['Volunteer Work', 'Movie Night'] },
     { date: format(new Date(), 'yyyy-MM-dd'), mood: 5, events: ['Morning Walk', 'Productive Study Session'] },
+  ]);
+
+  // Calendar events
+  const [events, setEvents] = useState<CalendarEvent[]>([
+    {
+      id: '1',
+      title: 'Introduction to Psychology',
+      start: '09:00',
+      end: '10:00',
+      category: 'class',
+      notes: 'Review chapters 3-4'
+    },
+    {
+      id: '2',
+      title: 'Study Group - Statistics',
+      start: '11:00',
+      end: '13:00',
+      category: 'study',
+      notes: 'Bring practice problems'
+    },
+    {
+      id: '3',
+      title: 'Computer Science Lab',
+      start: '15:30',
+      end: '17:00',
+      category: 'class',
+    }
   ]);
 
   const handleLogout = () => {
@@ -68,11 +106,21 @@ const Dashboard = () => {
   };
 
   const handleAddEvent = () => {
+    setIsAddEventOpen(true);
+  };
+
+  const handleEventCreate = (newEvent: Omit<CalendarEvent, 'id'>) => {
+    const event: CalendarEvent = {
+      ...newEvent,
+      id: Date.now().toString(),
+    };
+    
+    setEvents([...events, event]);
+    
     toast({
-      title: "Add Event",
-      description: "Event creation coming soon! Connect Lovable Cloud to save events.",
+      title: "Event Added! 🎉",
+      description: `${event.title} has been added to your schedule.`,
     });
-    // TODO: Open event creation modal or navigate to event form
   };
 
   return (
@@ -177,69 +225,47 @@ const Dashboard = () => {
                 </Button>
               </div>
 
-              {/* Calendar Placeholder */}
+              {/* Calendar Events */}
               <div className="space-y-4">
-                {/* Time slot 1 */}
-                <div className="flex gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-foreground">9:00</p>
-                    <p className="text-xs text-muted-foreground">AM</p>
+                {events.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>No events scheduled yet.</p>
+                    <p className="text-sm">Click "Add Event" to get started!</p>
                   </div>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-primary" />
-                      <p className="font-medium text-foreground">Introduction to Psychology</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Room 204 • 1 hour</p>
-                    <p className="text-sm text-muted-foreground italic">Notes: Review chapters 3-4</p>
-                  </div>
-                </div>
+                ) : (
+                  events.map((event) => {
+                    const categoryColors: Record<string, string> = {
+                      class: 'bg-primary',
+                      study: 'bg-secondary',
+                      wellness: 'bg-success',
+                      social: 'bg-accent',
+                      other: 'bg-muted-foreground',
+                    };
 
-                {/* Time slot 2 */}
-                <div className="flex gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-foreground">11:00</p>
-                    <p className="text-xs text-muted-foreground">AM</p>
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-secondary" />
-                      <p className="font-medium text-foreground">Study Group - Statistics</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Library • 2 hours</p>
-                    <p className="text-sm text-muted-foreground italic">Notes: Bring practice problems</p>
-                  </div>
-                </div>
-
-                {/* Free time slot */}
-                <div className="flex gap-4 p-4 rounded-lg bg-success/5 border border-success/20">
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-foreground">2:00</p>
-                    <p className="text-xs text-muted-foreground">PM</p>
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-success" />
-                      <p className="font-medium text-success">Free Time</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Perfect for a wellness activity!</p>
-                  </div>
-                </div>
-
-                {/* Time slot 3 */}
-                <div className="flex gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-foreground">3:30</p>
-                    <p className="text-xs text-muted-foreground">PM</p>
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-accent" />
-                      <p className="font-medium text-foreground">Computer Science Lab</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Tech Building • 1.5 hours</p>
-                  </div>
-                </div>
+                    return (
+                      <div
+                        key={event.id}
+                        className="flex gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                      >
+                        <div className="text-center min-w-[60px]">
+                          <p className="text-sm font-semibold text-foreground">{event.start}</p>
+                          <p className="text-xs text-muted-foreground">to</p>
+                          <p className="text-sm font-semibold text-foreground">{event.end}</p>
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${categoryColors[event.category]}`} />
+                            <p className="font-medium text-foreground">{event.title}</p>
+                          </div>
+                          {event.notes && (
+                            <p className="text-sm text-muted-foreground italic">Notes: {event.notes}</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
 
               {/* View Controls */}
@@ -252,6 +278,13 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Add Event Dialog */}
+      <AddEventDialog
+        open={isAddEventOpen}
+        onOpenChange={setIsAddEventOpen}
+        onAddEvent={handleEventCreate}
+      />
     </div>
   );
 };
