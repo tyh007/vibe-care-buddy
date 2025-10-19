@@ -219,7 +219,7 @@ const Dashboard = () => {
               </div>
               
               <div className="flex justify-between gap-2">
-                {['😊', '🙂', '😐', '😕', '😢'].map((emoji, idx) => (
+                {['😢', '😕', '😐', '🙂', '😊'].map((emoji, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleMoodSelect(idx)}
