@@ -242,7 +242,7 @@ const Dashboard = () => {
     : events.filter(e => e.category === selectedCategory);
 
   return (
-    <div className="min-h-screen flex flex-col w-full bg-gradient-hero">
+    <div className="min-h-screen flex flex-col w-full bg-forest">
       {/* Mobile Header with Hamburger */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between p-4">
