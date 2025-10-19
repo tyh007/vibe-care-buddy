@@ -10,6 +10,8 @@ import { SuggestionEngine } from "@/components/SuggestionEngine";
 import { CalendarWeekView } from "@/components/calendar/CalendarWeekView";
 import { CalendarMonthView } from "@/components/calendar/CalendarMonthView";
 import { NotesEditorSidebar } from "@/components/calendar/NotesEditorSidebar";
+import { VibePartner } from "@/components/mascot/VibePartner";
+import { useRewardSystem } from "@/hooks/useRewardSystem";
 import { format, subDays, parseISO } from "date-fns";
 
 interface MoodEntry {
@@ -37,6 +39,12 @@ const Dashboard = () => {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
+  
+  // Reward system
+  const rewardSystem = useRewardSystem();
+  const [partnerName, setPartnerName] = useState(() => 
+    localStorage.getItem('vibePartnerName') || 'Vibe Buddy'
+  );
   
   // Sample mood data with dates and events (last 7 days)
   const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([
@@ -114,16 +122,8 @@ const Dashboard = () => {
       return [...prev.slice(1), newEntry];
     });
     
-    // Show feedback toast
-    const moodLabels = ['struggling today', 'not feeling great', 'doing okay', 'feeling good', 'feeling great'];
-    const moodEmojis = ['😢', '😕', '😐', '🙂', '😊'];
-    
-    toast({
-      title: `Mood recorded ${moodEmojis[moodIndex]}`,
-      description: `Thanks for checking in! You're ${moodLabels[moodIndex]}.`,
-    });
-
-    // TODO: Save to database when backend is connected
+    // Award points for mood check-in
+    rewardSystem.rewardMoodCheckIn();
   };
 
   const handleAddEvent = () => {
@@ -143,10 +143,8 @@ const Dashboard = () => {
     
     setEvents([...events, event].sort((a, b) => a.start.localeCompare(b.start)));
     
-    toast({
-      title: "Event Added! 🎉",
-      description: `${event.title} has been added to your schedule.`,
-    });
+    // Award points for event creation
+    rewardSystem.rewardEventCreation();
   };
 
   const handleEventUpdate = (eventId: string, updates: Partial<CalendarEvent>) => {
@@ -208,10 +206,8 @@ const Dashboard = () => {
     
     setEvents([...events, newEvent].sort((a, b) => a.start.localeCompare(b.start)));
     
-    toast({
-      title: "Wellness Activity Scheduled! 🌟",
-      description: `${suggestion.title} added at ${suggestedStart}`,
-    });
+    // Award points for completing activity
+    rewardSystem.rewardActivityCompletion();
   };
 
   const handleDropSuggestion = (suggestionData: any, slotStart: string) => {
@@ -246,10 +242,8 @@ const Dashboard = () => {
       e.id === eventId ? { ...e, notes } : e
     ));
     
-    toast({
-      title: "Notes Saved! 📝",
-      description: "Your notes have been saved successfully.",
-    });
+    // Award points for taking notes
+    rewardSystem.rewardNotesTaken();
   };
 
   return (
@@ -283,8 +277,17 @@ const Dashboard = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left Column: Mood Check & Suggestions */}
+          {/* Left Column: Mood Check, Vibe Partner & Suggestions */}
           <div className="lg:col-span-1 space-y-6">
+            {/* Vibe Partner */}
+            <VibePartner
+              points={rewardSystem.points}
+              level={rewardSystem.level}
+              name={partnerName}
+              mood={moodHistory[moodHistory.length - 1]?.mood}
+              onCustomize={() => setPartnerName(localStorage.getItem('vibePartnerName') || 'Vibe Buddy')}
+            />
+
             {/* Quick Mood Check-In */}
             <Card className="p-6 space-y-4 bg-card shadow-soft">
               <div className="flex items-center justify-between">
